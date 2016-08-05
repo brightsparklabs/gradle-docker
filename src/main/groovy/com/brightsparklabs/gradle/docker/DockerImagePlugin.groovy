@@ -15,18 +15,10 @@ import org.gradle.api.Project
 class DockerImagePlugin implements Plugin<Project> {
 
     // -------------------------------------------------------------------------
-    // INSTANCE VARIABLES
-    // -------------------------------------------------------------------------
-
-    /** The project directory */
-    def File projectDir
-
-    // -------------------------------------------------------------------------
     // IMPLEMENTATION: Plugin<Project>
     // -------------------------------------------------------------------------
 
     void apply(Project project) {
-        projectDir = project.projectDir
         // Create plugin configuration object.
         def config = project.extensions.create('dockerImagePluginConfig', DockerImagePluginExtension)
 
@@ -128,19 +120,20 @@ class DockerImagePlugin implements Plugin<Project> {
      * @return the version for the docker image
      */
     def getDockerImageVersion(File dockerFile) {
-        def dockerFilePath = dockerFile.getAbsolutePath()
+        def dockerFilename = dockerFile.getName()
+        def workingDir = dockerFile.getParentFile()
 
         // get the commit of the docker file
-        def commit = shell "git --no-pager log -n 1 --pretty=format:%h -- ${dockerFilePath}"
+        def commit = shell "git --no-pager log -n 1 --pretty=format:%h -- ${dockerFilename}", workingDir
 
         // set version to the tag after commit
-        def version = shell "git describe --contains ${commit}"
+        def version = shell "git describe --contains ${commit}", workingDir
         version = version.replaceFirst(~/(\d+\.\d+.\d+).*/, '$1')
         // if no tag after commit, use preceding tag with offset
-        version = version ?: shell("git describe ${commit}")
+        version = version ?: shell("git describe ${commit}", workingDir)
 
         // mark as dirty if currently modified
-        def dirtyFlag = shell "git status --porcelain ${dockerFilePath}"
+        def dirtyFlag = shell "git status --porcelain ${dockerFilename}", workingDir
         dirtyFlag = dirtyFlag.isEmpty() ? '' : '-dirty'
 
         return version + dirtyFlag
@@ -155,8 +148,8 @@ class DockerImagePlugin implements Plugin<Project> {
      *
      * @return the result from stdout
      */
-    def shell(String command) {
-        return command.execute(null, projectDir).text.trim()
+    def shell(String command, File workingDir) {
+        return command.execute(null, workingDir).text.trim()
     }
 }
 
