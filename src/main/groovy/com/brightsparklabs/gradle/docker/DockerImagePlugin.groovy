@@ -50,7 +50,7 @@ class DockerImagePlugin implements Plugin<Project> {
             description = "Builds docker images from Dockerfiles"
 
             doLast {
-                config.dockerFiles.each { imageName, dockerFilePath ->
+                config.dockerFiles.each { imageName, dockerFile->
                     def dockerDir = dockerFile.getParentFile()
                     def imageVersion = getDockerImageVersion(dockerFile)
                     def imageTag = "${imageName}:${imageVersion}"
