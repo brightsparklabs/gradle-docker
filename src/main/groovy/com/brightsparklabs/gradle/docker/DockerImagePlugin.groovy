@@ -14,26 +14,48 @@ import org.gradle.api.Project
  */
 class DockerImagePlugin implements Plugin<Project> {
 
+    // -------------------------------------------------------------------------
+    // INSTANCE VARIABLES
+    // -------------------------------------------------------------------------
+
+    /** The project directory */
     def File projectDir
 
+    // -------------------------------------------------------------------------
+    // IMPLEMENTATION: Plugin<Project>
+    // -------------------------------------------------------------------------
+
     void apply(Project project) {
-
-        // ---------------------------------------------------------------------
-        // CONFIGURATION
-        // ---------------------------------------------------------------------
-
         projectDir = project.projectDir
         // Create plugin configuration object.
         def config = project.extensions.create('dockerImagePluginConfig', DockerImagePluginExtension)
 
-        // ---------------------------------------------------------------------
-        // TASKS
-        // ---------------------------------------------------------------------
+        // Add all tasks once project configuration has been read.
+        // This allows us to use the plugin extension block in task
+        // configuration.
+        project.afterEvaluate {
+            addBuildDockerImageTask(project, config)
+            addSaveDockerImageTask(project, config)
+        }
+    }
 
+    // -------------------------------------------------------------------------
+    // METHODS
+    // -------------------------------------------------------------------------
+
+    /**
+     * Add a 'buildDockerImages' to the supplied project.
+     *
+     * @param project
+     *          project to add the task to.
+     *
+     * @param config
+     *          plugin configuration block.
+     */
+    def addBuildDockerImageTask(Project project, DockerImagePluginExtension config) {
         project.task('buildDockerImages') {
             group = "brightSPARK Labs - Docker"
             description = "Builds docker images from Dockerfiles"
-
 
             doLast {
                 config.dockerFiles.each { imageName, dockerFilePath ->
@@ -48,7 +70,18 @@ class DockerImagePlugin implements Plugin<Project> {
                 }
             }
         }
+    }
 
+    /**
+     * Add a 'saveDockerImages' to the supplied project.
+     *
+     * @param project
+     *          project to add the task to.
+     *
+     * @param config
+     *          plugin configuration block.
+     */
+    def addSaveDockerImageTask(Project project, DockerImagePluginExtension config) {
         project.task('saveDockerImages') {
             group = "brightSPARK Labs - Docker"
             description = "Saves docker images to TAR files"
@@ -83,10 +116,6 @@ class DockerImagePlugin implements Plugin<Project> {
             }
         }
     }
-
-    // -------------------------------------------------------------------------
-    // METHODS
-    // -------------------------------------------------------------------------
 
     /**
      * Returns the version to use for this docker image.
