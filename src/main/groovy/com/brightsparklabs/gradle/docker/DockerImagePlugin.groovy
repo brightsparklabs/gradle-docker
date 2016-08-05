@@ -51,7 +51,6 @@ class DockerImagePlugin implements Plugin<Project> {
 
             doLast {
                 config.dockerFiles.each { imageName, dockerFilePath ->
-                    def dockerFile = new File(dockerFilePath)
                     def dockerDir = dockerFile.getParentFile()
                     def imageVersion = getDockerImageVersion(dockerFile)
                     def imageTag = "${imageName}:${imageVersion}"
@@ -87,8 +86,7 @@ class DockerImagePlugin implements Plugin<Project> {
                 imagesDir.mkdirs()
                 config.imageTagDir.mkdirs()
 
-                config.dockerFiles.each { imageName, dockerFilePath ->
-                    def dockerFile = new File(dockerFilePath)
+                config.dockerFiles.each { imageName, dockerFile ->
                     def dockerDir = dockerFile.getParentFile()
                     def imageVersion = getDockerImageVersion(dockerFile)
                     def imageTag = "${imageName}:${imageVersion}"

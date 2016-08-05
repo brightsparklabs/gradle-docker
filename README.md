@@ -56,8 +56,8 @@ Use the following configuration block to configure the plugin:
 
 dockerImagePluginConfig {
     dockerFiles = [
-        'brightsparklabs/alpha': './src/docker/alpha/Dockerfile',
-        'brightsparklabs/bravo': './src/docker/bravo/docker-file',
+        'brightsparklabs/alpha': file('src/docker/alpha/Dockerfile'),
+        'brightsparklabs/bravo': new File(buildscript.sourceFile.parentFile, 'src/docker/bravo/docker-file'),
     ]
     imageTagDir = new File('src/dist/')
 }
