@@ -85,15 +85,15 @@ class DockerImagePlugin implements Plugin<Project> {
 
             doLast {
                 imagesDir.mkdirs()
+                config.imageTagDir.mkdirs()
 
                 config.dockerFiles.each { imageName, dockerFilePath ->
                     def dockerFile = new File(dockerFilePath)
                     def dockerDir = dockerFile.getParentFile()
                     def imageVersion = getDockerImageVersion(dockerFile)
                     def imageTag = "${imageName}:${imageVersion}"
-                    def imageFilename = "docker-image-" +
-                        imageName.replaceAll('/', '-') +
-                        "-${imageVersion}.tar"
+                    def friendlyImageName = imageName.replaceAll('/', '-')
+                    def imageFilename = "docker-image-${friendlyImageName}-${imageVersion}.tar"
                     def imageFile = new File(imagesDir, imageFilename)
 
                     project.exec {
@@ -102,8 +102,9 @@ class DockerImagePlugin implements Plugin<Project> {
                         workingDir imagesDir
                     }
 
-                    // store image tag in distribution
-                    //versionFile.text = imageTag
+                    // store image tag
+                    def imageTagFile = new File(config.imageTagDir, ".VERSION.DOCKER-IMAGE.${friendlyImageName}")
+                    imageTagFile.text = imageTag
                 }
             }
         }

@@ -10,6 +10,9 @@ package com.brightsparklabs.gradle.docker
  */
 class DockerImagePluginExtension {
     /** Dockerfiles to create images from mapped as: image_name => Dockerfile. */
-    Map dockerFiles= [:]
+    Map dockerFiles = [:]
+
+    /** Directory to store image tags in */
+    File imageTagDir = new File('build/imageTags')
 }
 
