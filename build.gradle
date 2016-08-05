@@ -1,0 +1,59 @@
+/*
+ * Created by brightSPARK Labs
+ * www.brightsparklabs.com
+ */
+
+// -----------------------------------------------------------------------------
+// PLUGINS
+// -----------------------------------------------------------------------------
+
+plugins {
+    id 'java-gradle-plugin'
+    id 'groovy'
+    id 'com.gradle.plugin-publish' version '0.9.5'
+}
+
+// -----------------------------------------------------------------------------
+// PROJECT IDENTIFICATION
+// -----------------------------------------------------------------------------
+
+project.description  = 'Gradle plugins for working with Docker'
+project.group        = 'com.brightsparklabs'
+project.version      = 'git describe --dirty'.execute().text.trim()
+
+project.ext.scm      = 'scm:git@github.com:brightsparklabs/gradle-docker.git'
+project.ext.url      = 'https://github.com/brightsparklabs/gradle-docker'
+
+def dockerImagePluginId = 'com.brightsparklabs.gradle.docker-image'
+
+// -----------------------------------------------------------------------------
+// CONFIGURATION: java-gradle-plugin
+// -----------------------------------------------------------------------------
+
+gradlePlugin {
+    plugins {
+        simplePlugin {
+            id = dockerImagePluginId
+            implementationClass = 'com.brightsparklabs.gradle.docker.DockerImagePlugin'
+        }
+    }
+}
+
+// -----------------------------------------------------------------------------
+// CONFIGURATION: com.gradle.plugin-publish
+// -----------------------------------------------------------------------------
+
+pluginBundle {
+    website = project.url
+    vcsUrl = project.scm
+    tags = ['docker', 'image']
+
+    plugins {
+        dockerImagePlugin {
+            id = dockerImagePluginId
+            displayName = 'Gradle Docker Image'
+            description = 'Simplifies working with Docker images'
+        }
+    }
+}
+
