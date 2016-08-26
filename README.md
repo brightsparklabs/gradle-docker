@@ -32,7 +32,7 @@ each Docker image. This file will contain the full tag of the image. E.g.
 
 Each image tag file will be named using the format:
 
-- `.VERSION.DOCKER_IMAGE.<image_name>`
+- `VERSION.DOCKER_IMAGE.<image_name>`
     - Where:
         - `image_name` is a filename friendly version of the `image name`
           provided in the plugin's configuration block.
@@ -55,9 +55,17 @@ Use the following configuration block to configure the plugin:
 // file: build.gradle
 
 dockerImagePluginConfig {
-    dockerFiles = [
-        'brightsparklabs/alpha': file('src/docker/alpha/Dockerfile'),
-        'brightsparklabs/bravo': new File(buildscript.sourceFile.parentFile, 'src/docker/bravo/docker-file'),
+    dockerFileDefinitions = [
+        [
+            'dockerfile' : file('src/alpha/Dockerfile'),
+            'repository' : 'brightsparklabs/alpha',
+            'tags'       : ['v0.1.0', 'awesome-ant']
+        ],
+        [
+            'dockerfile' : file('src/bravo/Dockerfile'),
+            'repository' : 'brightsparklabs/bravo',
+            'tags'       : ['2.1.0', 'brainy-bear']
+        ],
     ]
     imageTagDir = new File('src/dist/')
 }
@@ -65,10 +73,11 @@ dockerImagePluginConfig {
 
 Where:
 
-- `dockerFiles` is a map of `image_name` to `dockerfile`.
-    - An image will be built for each `image_name` specified using the
-      associated `dockerfile`.
-- `imageTagDir` is the directory in which to store image tag files.
+- `dockerFileDefinitions`: [`Map[]`] each map has the following keys:
+    - `dockerfile`: [`File`] dockerfile to build
+    - `repository`: [`String`] repository name for the built docker image
+    - `tags`: [String[]`] custom tags for the built docker image
+- `imageTagDir`: [`File`] the directory in which to store image tag files.
 
 # Tasks
 

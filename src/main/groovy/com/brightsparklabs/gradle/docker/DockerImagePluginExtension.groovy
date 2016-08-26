@@ -13,12 +13,12 @@ class DockerImagePluginExtension {
      * Definitions of the Dockerfiles to build. This is an array of Maps. Each
      * Map has the following format:
      *    [
-     *        // the dockerfile to build
+     *        // dockerfile to build
      *        'dockerfile' : file('src/acme/Dockerfile'),
      *        // repository name for the built docker image
      *        'repository' : 'brightsparklabs/acme',
      *        // custom tags for the built docker image
-     *        'tags'       : ['v1.0.1', 'blue']
+     *        'tags'       : ['v1.0.1', 'awesome-ant']
      *    ]
      */
     List dockerFileDefinitions = []

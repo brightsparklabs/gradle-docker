@@ -135,7 +135,7 @@ class DockerImagePlugin implements Plugin<Project> {
     def addPublishDockerImageTask(Project project, DockerImagePluginExtension config) {
         project.task('publishDockerImages') {
             group = "brightSPARK Labs - Docker"
-            description = "Publishes docker images to the docker registry"
+            description = "Publishes docker images to the docker registry. Login session must already be established via `docker login`."
             dependsOn project.buildDockerImages
 
             doLast {
