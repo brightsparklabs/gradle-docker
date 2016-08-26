@@ -50,12 +50,23 @@ class DockerImagePlugin implements Plugin<Project> {
             description = "Builds docker images from Dockerfiles"
 
             doLast {
-                config.dockerFiles.each { imageName, dockerFile->
-                    def dockerDir = dockerFile.getParentFile()
-                    def imageVersion = getDockerImageVersion(dockerFile)
-                    def imageTag = "${imageName}:${imageVersion}"
+                config.dockerFileDefinitions.each { definition ->
+                    def dockerDir = definition.dockerFile.getParentFile()
+                    // add default tag based on git version of the Dockerfile
+                    def imageVersion = getDockerImageVersion(definition.dockerFile)
+                    def imageTag = "${definition.imageName}:g${imageVersion}"
+                    def command = ['docker', 'build', '-t', imageTag]
+                    // add any specified tags
+                    if (! definition.tags.isEmpty()) {
+                        def tags = definition.tags.collect { "${definition.imageName}:${it}" }
+                        tags = tags.join(',-t,').split(',')
+                        command << '-t'
+                        command.addAll(tags)
+                    }
+                    command << '.'
+
                     project.exec {
-                       commandLine 'docker', 'build', '-t', imageTag, '.'
+                       commandLine command
                        workingDir dockerDir
                     }
                 }
@@ -78,7 +89,7 @@ class DockerImagePlugin implements Plugin<Project> {
             description = "Saves docker images to TAR files"
             dependsOn project.buildDockerImages
 
-            inputs.files config.dockerFiles.values()
+            inputs.files config.dockerFileDefinitions.collect { it.dockerFile }
             def imagesDir = new File(project.buildDir, '/images')
             outputs.dir imagesDir
 
@@ -86,12 +97,12 @@ class DockerImagePlugin implements Plugin<Project> {
                 imagesDir.mkdirs()
                 config.imageTagDir.mkdirs()
 
-                config.dockerFiles.each { imageName, dockerFile ->
-                    def dockerDir = dockerFile.getParentFile()
-                    def imageVersion = getDockerImageVersion(dockerFile)
-                    def imageTag = "${imageName}:${imageVersion}"
-                    def friendlyImageName = imageName.replaceAll('/', '-')
-                    def imageFilename = "docker-image-${friendlyImageName}-${imageVersion}.tar"
+                config.dockerFileDefinitions.each { definition ->
+                    def dockerDir = definition.dockerFile.getParentFile()
+                    def imageVersion = getDockerImageVersion(definition.dockerFile)
+                    def imageTag = "${definition.imageName}:g${imageVersion}"
+                    def friendlyImageName = definition.imageName.replaceAll('/', '-')
+                    def imageFilename = "docker-image-${friendlyImageName}-g${imageVersion}.tar"
                     def imageFile = new File(imagesDir, imageFilename)
 
                     project.exec {
@@ -101,7 +112,7 @@ class DockerImagePlugin implements Plugin<Project> {
                     }
 
                     // store image tag
-                    def imageTagFile = new File(config.imageTagDir, ".VERSION.DOCKER-IMAGE.${friendlyImageName}")
+                    def imageTagFile = new File(config.imageTagDir, "VERSION.DOCKER-IMAGE.${friendlyImageName}")
                     imageTagFile.text = imageTag
                 }
             }
