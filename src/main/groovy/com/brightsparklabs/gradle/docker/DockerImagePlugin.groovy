@@ -28,6 +28,7 @@ class DockerImagePlugin implements Plugin<Project> {
         project.afterEvaluate {
             addBuildDockerImageTask(project, config)
             addSaveDockerImageTask(project, config)
+            addPublishDockerImageTask(project, config)
         }
     }
 
@@ -49,16 +50,20 @@ class DockerImagePlugin implements Plugin<Project> {
             group = "brightSPARK Labs - Docker"
             description = "Builds docker images from Dockerfiles"
 
+            inputs.files config.dockerFileDefinitions.collect { it.dockerfile }
+            outputs.dir config.imageTagDir
+
             doLast {
+                config.imageTagDir.mkdirs()
+
                 config.dockerFileDefinitions.each { definition ->
-                    def dockerDir = definition.dockerFile.getParentFile()
                     // add default tag based on git version of the Dockerfile
-                    def imageVersion = getDockerImageVersion(definition.dockerFile)
-                    def imageTag = "${definition.imageName}:g${imageVersion}"
+                    def imageVersion = getDockerImageVersion(definition.dockerfile)
+                    def imageTag = "${definition.repository}:g${imageVersion}"
                     def command = ['docker', 'build', '-t', imageTag]
                     // add any specified tags
                     if (! definition.tags.isEmpty()) {
-                        def tags = definition.tags.collect { "${definition.imageName}:${it}" }
+                        def tags = definition.tags.collect { "${definition.repository}:${it}" }
                         tags = tags.join(',-t,').split(',')
                         command << '-t'
                         command.addAll(tags)
@@ -67,8 +72,13 @@ class DockerImagePlugin implements Plugin<Project> {
 
                     project.exec {
                        commandLine command
-                       workingDir dockerDir
+                       workingDir definition.dockerfile.getParentFile()
                     }
+
+                    // store image tag
+                    def friendlyImageName = definition.repository.replaceAll('/', '-')
+                    def imageTagFile = new File(config.imageTagDir, "VERSION.DOCKER-IMAGE.${friendlyImageName}")
+                    imageTagFile.text = imageTag
                 }
             }
         }
@@ -89,19 +99,17 @@ class DockerImagePlugin implements Plugin<Project> {
             description = "Saves docker images to TAR files"
             dependsOn project.buildDockerImages
 
-            inputs.files config.dockerFileDefinitions.collect { it.dockerFile }
+            inputs.files config.dockerFileDefinitions.collect { it.dockerfile }
             def imagesDir = new File(project.buildDir, '/images')
             outputs.dir imagesDir
 
             doLast {
                 imagesDir.mkdirs()
-                config.imageTagDir.mkdirs()
 
                 config.dockerFileDefinitions.each { definition ->
-                    def dockerDir = definition.dockerFile.getParentFile()
-                    def imageVersion = getDockerImageVersion(definition.dockerFile)
-                    def imageTag = "${definition.imageName}:g${imageVersion}"
-                    def friendlyImageName = definition.imageName.replaceAll('/', '-')
+                    def imageVersion = getDockerImageVersion(definition.dockerfile)
+                    def imageTag = "${definition.repository}:g${imageVersion}"
+                    def friendlyImageName = definition.repository.replaceAll('/', '-')
                     def imageFilename = "docker-image-${friendlyImageName}-g${imageVersion}.tar"
                     def imageFile = new File(imagesDir, imageFilename)
 
@@ -110,10 +118,31 @@ class DockerImagePlugin implements Plugin<Project> {
                         standardOutput = new FileOutputStream(imageFile)
                         workingDir imagesDir
                     }
+                }
+            }
+        }
+    }
 
-                    // store image tag
-                    def imageTagFile = new File(config.imageTagDir, "VERSION.DOCKER-IMAGE.${friendlyImageName}")
-                    imageTagFile.text = imageTag
+    /**
+     * Add a 'publishDockerImages' to the supplied project.
+     *
+     * @param project
+     *          project to add the task to.
+     *
+     * @param config
+     *          plugin configuration block.
+     */
+    def addPublishDockerImageTask(Project project, DockerImagePluginExtension config) {
+        project.task('publishDockerImages') {
+            group = "brightSPARK Labs - Docker"
+            description = "Publishes docker images to the docker registry"
+            dependsOn project.buildDockerImages
+
+            doLast {
+                config.dockerFileDefinitions.each { definition ->
+                    project.exec {
+                        commandLine 'docker', 'push', definition.repository
+                    }
                 }
             }
         }
