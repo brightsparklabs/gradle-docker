@@ -24,6 +24,6 @@ class DockerImagePluginExtension {
     List dockerFileDefinitions = []
 
     /** Directory to store image tags in */
-    File imageTagDir = new File('build/imageTags')
+    File imageTagDir
 }
 

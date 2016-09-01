@@ -21,6 +21,8 @@ class DockerImagePlugin implements Plugin<Project> {
     void apply(Project project) {
         // Create plugin configuration object.
         def config = project.extensions.create('dockerImagePluginConfig', DockerImagePluginExtension)
+        // set default values for configuration based on project
+        config.imageTagDir = config.imageTagDir ?: new File(project.buildDir, 'imageTags')
 
         // Add all tasks once project configuration has been read.
         // This allows us to use the plugin extension block in task
@@ -50,8 +52,8 @@ class DockerImagePlugin implements Plugin<Project> {
             group = "brightSPARK Labs - Docker"
             description = "Builds docker images from Dockerfiles"
 
-            inputs.files config.dockerFileDefinitions.collect { it.dockerfile }
-            outputs.dir config.imageTagDir
+            // always run task as any source files may have changed
+            outputs.upToDateWhen { false }
 
             doLast {
                 config.imageTagDir.mkdirs()
@@ -61,9 +63,10 @@ class DockerImagePlugin implements Plugin<Project> {
                     def imageVersion = getDockerImageVersion(definition.dockerfile)
                     def imageTag = "${definition.repository}:g${imageVersion}"
                     def command = ['docker', 'build', '-t', imageTag]
-                    // add any specified tags
-                    if (! definition.tags.isEmpty()) {
-                        def tags = definition.tags.collect { "${definition.repository}:${it}" }
+                    // add any custom tags
+                    def customTags = definition.tags ?: []
+                    if (! customTags.isEmpty()) {
+                        def tags = customTags.collect { "${definition.repository}:${it}" }
                         tags = tags.join(',-t,').split(',')
                         command << '-t'
                         command.addAll(tags)
