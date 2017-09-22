@@ -21,9 +21,7 @@ rules:
 - The `repository` field of the image tag will be set to the `image name`
   provided in the plugin's configuration block.
 - The `tag` (version) field of the image tag will be generated from the git
-  tags in the repository. Ideally it will look for the first tag which contains
-  the version of the `Dockerfile`. Failing that, it will use `git describe` to
-  uniquely identify the version of the file.
+  tag using `git describe --dirty`.
 
 When exporting Docker images to file, a image tag file will be generated for
 each Docker image. This file will contain the full tag of the image. E.g.

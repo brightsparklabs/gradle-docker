@@ -59,8 +59,8 @@ class DockerImagePlugin implements Plugin<Project> {
                 config.imageTagDir.mkdirs()
 
                 config.dockerFileDefinitions.each { definition ->
-                    // add default tag based on git version of the Dockerfile
-                    def imageVersion = getDockerImageVersion(definition.dockerfile)
+                    // add default tag based on git tag of the repository
+                    def imageVersion = getRepositoryGitTag(definition.dockerfile)
                     def imageTag = "${definition.repository}:g${imageVersion}"
                     def command = ['docker', 'build', '-t', imageTag]
                     // add any custom tags
@@ -110,7 +110,7 @@ class DockerImagePlugin implements Plugin<Project> {
                 imagesDir.mkdirs()
 
                 config.dockerFileDefinitions.each { definition ->
-                    def imageVersion = getDockerImageVersion(definition.dockerfile)
+                    def imageVersion = getRepositoryGitTag(definition.dockerfile)
                     def imageTag = "${definition.repository}:g${imageVersion}"
                     def friendlyImageName = definition.repository.replaceAll('/', '-')
                     def imageFilename = "docker-image-${friendlyImageName}-g${imageVersion}.tar"
@@ -152,33 +152,15 @@ class DockerImagePlugin implements Plugin<Project> {
     }
 
     /**
-     * Returns the version to use for this docker image.
+     * Returns the git tag of the repository.
      *
-     * This is derived as the first git tag after the docker file's commit hash.
-     * If there is no tag after the hash, then it reverts to a
-     * 'git describe --dirty <commit>'. If the Dockerfile has been modified then
-     * '-dirty' will be appended.
-     *
-     * @return the version for the docker image
+     * @return the git tag of the repository
      */
-    def getDockerImageVersion(File dockerFile) {
+    def getRepositoryGitTag(File dockerFile) {
         def dockerFilename = dockerFile.getName()
         def workingDir = dockerFile.getParentFile()
-
-        // get the commit of the docker file
-        def commit = shell "git --no-pager log -n 1 --pretty=format:%h -- ${dockerFilename}", workingDir
-
-        // set version to the tag after commit
-        def version = shell "git describe --contains ${commit}", workingDir
-        version = version.replaceFirst(~/(\d+\.\d+.\d+).*/, '$1')
-        // if no tag after commit, use preceding tag with offset
-        version = version ?: shell("git describe ${commit}", workingDir)
-
-        // mark as dirty if currently modified
-        def dirtyFlag = shell "git status --porcelain ${dockerFilename}", workingDir
-        dirtyFlag = dirtyFlag.isEmpty() ? '' : '-dirty'
-
-        return version + dirtyFlag
+        def tag = shell "git describe --dirty", workingDir
+        return tag
     }
 
     /**
