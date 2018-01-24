@@ -66,9 +66,9 @@ class DockerImagePlugin implements Plugin<Project> {
                     // Add tag based on git tag of the folder in the repository (if it exists)
                     def imageVersion = getRepositoryGitTag(definition.dockerfile.getParent())
                     if (! imageVersion.isEmpty()) {
-                        def imageTag = "${definition.repository}:g${imageVersion}"
+                        def gitTag = "${definition.repository}:g${imageVersion}"
                         command << ',-t'
-                        command << imageTag
+                        command << gitTag
                     }
 
                     // Add any custom tags defined in code
