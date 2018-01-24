@@ -59,11 +59,19 @@ class DockerImagePlugin implements Plugin<Project> {
                 config.imageTagDir.mkdirs()
 
                 config.dockerFileDefinitions.each { definition ->
-                    // add default tag based on git tag of the repository
-                    def imageVersion = getRepositoryGitTag(definition.dockerfile)
-                    def imageTag = "${definition.repository}:g${imageVersion}"
+                    // Set the default tag as "latest"
+                    def imageTag = "${definition.repository}:latest"
                     def command = ['docker', 'build', '-t', imageTag]
-                    // add any custom tags
+
+                    // Add tag based on git tag of the folder in the repository (if it exists)
+                    def imageVersion = getRepositoryGitTag(definition.dockerfile.getParent())
+                    if (! imageVersion.isEmpty()) {
+                        def imageTag = "${definition.repository}:g${imageVersion}"
+                        command << ',-t'
+                        command << imageTag
+                    }
+
+                    // Add any custom tags defined in code
                     def customTags = definition.tags ?: []
                     if (! customTags.isEmpty()) {
                         def tags = customTags.collect { "${definition.repository}:${it}" }
@@ -176,4 +184,3 @@ class DockerImagePlugin implements Plugin<Project> {
         return command.execute(null, workingDir).text.trim()
     }
 }
-
