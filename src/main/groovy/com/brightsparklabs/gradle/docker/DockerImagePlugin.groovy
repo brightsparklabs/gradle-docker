@@ -59,16 +59,19 @@ class DockerImagePlugin implements Plugin<Project> {
                 config.imageTagDir.mkdirs()
 
                 config.dockerFileDefinitions.each { definition ->
-                    // Set the default tag as "latest"
-                    def imageTag = "${definition.repository}:latest"
-                    def command = ['docker', 'build', '-t', imageTag]
+                    // Add default tags for 'latest' and repo git tag
+                    def latestTag = "${definition.repository}:latest"
+                    def repoGitTag = getRepositoryGitTag(definition.dockerfile.getParentFile())
+                    repoGitTag = "${definition.repository}:g" + repoGitTag
+                    def command = ['docker', 'build', '-t', latestTag, '-t', repoGitTag]
 
-                    // Add tag based on git tag of the folder in the repository (if it exists)
-                    def imageVersion = getRepositoryGitTag(definition.dockerfile.getParent())
-                    if (! imageVersion.isEmpty()) {
-                        def gitTag = "${definition.repository}:g${imageVersion}"
-                        command << ',-t'
-                        command << gitTag
+                    // Add tag based on git commit of the folder containing dockerfile
+                    File folder = definition.dockerfile.getParentFile()
+                    def folderTag = getLastCommitHash(folder)
+                    if (! folderTag.isEmpty()) {
+                        folderTag = "${definition.repository}:g${folderTag}"
+                        command << '-t'
+                        command << folderTag
                     }
 
                     // Add any custom tags defined in code
@@ -89,7 +92,7 @@ class DockerImagePlugin implements Plugin<Project> {
                     // store image tag
                     def friendlyImageName = definition.repository.replaceAll('/', '-')
                     def imageTagFile = new File(config.imageTagDir, "VERSION.DOCKER-IMAGE.${friendlyImageName}")
-                    imageTagFile.text = imageTag
+                    imageTagFile.text = repoGitTag
                 }
             }
         }
@@ -118,7 +121,7 @@ class DockerImagePlugin implements Plugin<Project> {
                 imagesDir.mkdirs()
 
                 config.dockerFileDefinitions.each { definition ->
-                    def imageVersion = getRepositoryGitTag(definition.dockerfile)
+                    def imageVersion = getRepositoryGitTag(definition.dockerfile.getParentFile())
                     def imageTag = "${definition.repository}:g${imageVersion}"
                     def friendlyImageName = definition.repository.replaceAll('/', '-')
                     def imageFilename = "docker-image-${friendlyImageName}-g${imageVersion}.tar"
@@ -162,21 +165,39 @@ class DockerImagePlugin implements Plugin<Project> {
     /**
      * Returns the git tag of the repository.
      *
-     * @return the git tag of the repository
+     * @param workingDir
+     *          the directory to execute the git command within
+     *
+     * @return the git tag of the repository or '0.0.0-UNKNOWN' if no tags
+     *         exist
      */
-    def getRepositoryGitTag(File dockerFile) {
-        def dockerFilename = dockerFile.getName()
-        def workingDir = dockerFile.getParentFile()
+    def getRepositoryGitTag(File workingDir) {
         def tag = shell "git describe --dirty", workingDir
+        if (tag.isEmpty()) {
+            tag = '0.0.0-UNKNOWN'
+        }
+        return tag
+    }
+
+    /**
+     * Returns the last git commit hash of the specified file.
+     *
+     * @return the last git commit hash of the specified file
+     */
+    def getLastCommitHash(File file) {
+        def workingDir = file.getParentFile()
+        def tag = shell "git log -n 1 --pretty=format:%h -- ${file}", workingDir
         return tag
     }
 
     /**
      * Executes a shell command and returns the stdout result.
-     * Working directory is always the projectDir.
      *
      * @param command
      *          the command to execute (cannot contain pipes)
+     *
+     * @param workingDir
+     *          the directory to execute the command within
      *
      * @return the result from stdout
      */
@@ -184,3 +205,4 @@ class DockerImagePlugin implements Plugin<Project> {
         return command.execute(null, workingDir).text.trim()
     }
 }
+
