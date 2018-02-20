@@ -70,6 +70,7 @@ dockerImagePluginConfig {
         ],
     ]
     imageTagDir = new File('build/dist/imageTags/')
+    continueOnFailure = true
 }
 ```
 
@@ -81,6 +82,8 @@ Where:
     - `tags`: [String[]`] custom tags for the built docker image (optional)
 - `imageTagDir`: [`File`] the directory in which to store image tag files
   (optional, default is `build/imageTags`)
+- `continueOnFailure`: [`Boolean`] set to true if the build should continue
+  even if a docker image build fails (optional, default is `false`)
 
 # Tasks
 

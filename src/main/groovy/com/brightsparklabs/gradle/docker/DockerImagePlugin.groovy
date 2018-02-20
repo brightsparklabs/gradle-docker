@@ -6,6 +6,7 @@
 package com.brightsparklabs.gradle.docker
 
 import java.util.logging.Logger
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -13,6 +14,13 @@ import org.gradle.api.Project
  * Simplifies managing Docker images.
  */
 class DockerImagePlugin implements Plugin<Project> {
+
+    // ------------------------------------------------------------------------
+    // INSTANCE VARIABLES
+    // ------------------------------------------------------------------------
+
+    /** any failures which occurred with running docker commands */
+    def failures = []
 
     // -------------------------------------------------------------------------
     // IMPLEMENTATION: Plugin<Project>
@@ -31,6 +39,12 @@ class DockerImagePlugin implements Plugin<Project> {
             addBuildDockerImageTask(project, config)
             addSaveDockerImageTask(project, config)
             addPublishDockerImageTask(project, config)
+        }
+
+        project.gradle.buildFinished() {
+            if (!failures.isEmpty()) {
+                throw new GradleException("Failed to build the following Dockerfiles:\n- " + failures.join('\n- '))
+            }
         }
     }
 
@@ -84,15 +98,27 @@ class DockerImagePlugin implements Plugin<Project> {
                     }
                     command << '.'
 
-                    project.exec {
-                       commandLine command
-                       workingDir definition.dockerfile.getParentFile()
+                    def buildResult = project.exec {
+                        commandLine command
+                        workingDir definition.dockerfile.getParentFile()
+                        // do not prevent other docker builds if one fails
+                        ignoreExitValue true
                     }
-
-                    // store image tag
-                    def friendlyImageName = definition.repository.replaceAll('/', '-')
-                    def imageTagFile = new File(config.imageTagDir, "VERSION.DOCKER-IMAGE.${friendlyImageName}")
-                    imageTagFile.text = repoGitTag
+                    if (buildResult.getExitValue() == 0) {
+                        // store image tag
+                        def friendlyImageName = definition.repository.replaceAll('/', '-')
+                        def imageTagFile = new File(config.imageTagDir, "VERSION.DOCKER-IMAGE.${friendlyImageName}")
+                        imageTagFile.text = repoGitTag
+                    }
+                    else {
+                        def error = "Could not build docker file [${definition.dockerfile}]"
+                        if (config.continueOnFailure) {
+                            failures << error
+                        }
+                        else {
+                            throw new GradleException(error)
+                        }
+                    }
                 }
             }
         }
@@ -127,10 +153,21 @@ class DockerImagePlugin implements Plugin<Project> {
                     def imageFilename = "docker-image-${friendlyImageName}-g${imageVersion}.tar"
                     def imageFile = new File(imagesDir, imageFilename)
 
-                    project.exec {
+                    def buildResult = project.exec {
                         commandLine 'docker', 'save', imageTag
                         standardOutput = new FileOutputStream(imageFile)
                         workingDir imagesDir
+                        // do not prevent other docker builds if one fails
+                        ignoreExitValue true
+                    }
+                    if (buildResult.getExitValue() != 0) {
+                        def error = "Could not save docker image [${imageTag}]"
+                        if (config.continueOnFailure) {
+                            failures << error
+                        }
+                        else {
+                            throw new GradleException(error)
+                        }
                     }
                 }
             }
@@ -154,8 +191,19 @@ class DockerImagePlugin implements Plugin<Project> {
 
             doLast {
                 config.dockerFileDefinitions.each { definition ->
-                    project.exec {
+                    def buildResult = project.exec {
                         commandLine 'docker', 'push', definition.repository
+                        // do not prevent other docker builds if one fails
+                        ignoreExitValue true
+                    }
+                    if (buildResult.getExitValue() != 0) {
+                        def error = "Could not push docker image [${definition.repository}]"
+                        if (config.continueOnFailure) {
+                            failures << error
+                        }
+                        else {
+                            throw new GradleException(error)
+                        }
                     }
                 }
             }

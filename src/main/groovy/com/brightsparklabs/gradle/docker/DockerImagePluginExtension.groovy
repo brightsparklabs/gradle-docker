@@ -25,5 +25,8 @@ class DockerImagePluginExtension {
 
     /** Directory to store image tags in */
     File imageTagDir
+
+    /** Whether to continue the build if a Dockerfile has an error */
+    Boolean continueOnFailure = false
 }
 
