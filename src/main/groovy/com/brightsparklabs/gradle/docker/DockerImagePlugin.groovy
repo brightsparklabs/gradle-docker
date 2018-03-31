@@ -98,6 +98,18 @@ class DockerImagePlugin implements Plugin<Project> {
                         command << '-t'
                         command.addAll(tags)
                     }
+
+                    // Add timestamp tag so we can differentiate builds easily
+                    def timestamp = new Date().toInstant().toString()
+                    command << '-t'
+                    command << "${definition.repository}:${timestamp.replace(':', '')}"
+
+                    // add build-args which can be referenced within Dockerfile
+                    command << '--build-arg'
+                    command << "BUILD_DATE=${timestamp}"
+                    command << '--build-arg'
+                    command << "VCS_REF=${repoGitTag}"
+
                     command << '.'
 
                     def oldLevel = logging.standardOutputCaptureLevel
