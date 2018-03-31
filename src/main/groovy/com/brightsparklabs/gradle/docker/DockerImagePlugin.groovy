@@ -84,11 +84,12 @@ class DockerImagePlugin implements Plugin<Project> {
                     // Add tag based on git commit of the folder containing dockerfile
                     File parentFolder = definition.dockerfile.parentFile
                     def folderTag = getLastCommitHash(parentFolder)
-                    if (! folderTag.isEmpty()) {
-                        folderTag = "${definition.repository}:g${folderTag}"
-                        command << '-t'
-                        command << folderTag
+                    if (folderTag.isEmpty()) {
+                        folderTag = 'UNKNOWN-COMMIT'
                     }
+                    folderTag = "${definition.repository}:g${folderTag}"
+                    command << '-t'
+                    command << folderTag
 
                     // Add any custom tags defined in code
                     def customTags = definition.tags ?: []
@@ -99,6 +100,10 @@ class DockerImagePlugin implements Plugin<Project> {
                         command.addAll(tags)
                     }
 
+                    // Add version tag from the version property in the build script
+                    command << '-t'
+                    command << "${definition.repository}:${project.version}"
+
                     // Add timestamp tag so we can differentiate builds easily
                     def timestamp = new Date().toInstant().toString()
                     command << '-t'
@@ -108,7 +113,7 @@ class DockerImagePlugin implements Plugin<Project> {
                     command << '--build-arg'
                     command << "BUILD_DATE=${timestamp}"
                     command << '--build-arg'
-                    command << "VCS_REF=${repoGitTag}"
+                    command << "VCS_REF=${folderTag}"
 
                     // folder to build
                     command << parentFolder
@@ -166,7 +171,7 @@ class DockerImagePlugin implements Plugin<Project> {
                 project.delete config.imagesDir
                 config.imagesDir.mkdirs()
 
-                def imageVersion = getRepositoryGitTag()
+                def imageVersion = project.version
                 config.dockerFileDefinitions.each { definition ->
                     def imageTag = "${definition.repository}:${imageVersion}"
                     def friendlyImageName = definition.repository.replaceAll('/', '-')
