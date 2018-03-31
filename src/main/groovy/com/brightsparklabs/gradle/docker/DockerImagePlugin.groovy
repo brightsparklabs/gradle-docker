@@ -82,8 +82,8 @@ class DockerImagePlugin implements Plugin<Project> {
                     def command = ['docker', 'build', '-t', latestTag, '-t', gitTag]
 
                     // Add tag based on git commit of the folder containing dockerfile
-                    File folder = definition.dockerfile.parentFile
-                    def folderTag = getLastCommitHash(folder)
+                    File parentFolder = definition.dockerfile.parentFile
+                    def folderTag = getLastCommitHash(parentFolder)
                     if (! folderTag.isEmpty()) {
                         folderTag = "${definition.repository}:g${folderTag}"
                         command << '-t'
@@ -110,7 +110,8 @@ class DockerImagePlugin implements Plugin<Project> {
                     command << '--build-arg'
                     command << "VCS_REF=${repoGitTag}"
 
-                    command << '.'
+                    // folder to build
+                    command << parentFolder
 
                     def oldLevel = logging.standardOutputCaptureLevel
                     logging.captureStandardOutput LogLevel.INFO
@@ -118,7 +119,6 @@ class DockerImagePlugin implements Plugin<Project> {
 
                     def buildResult = project.exec {
                         commandLine command
-                        workingDir definition.dockerfile.parentFile
                         // do not prevent other docker builds if one fails
                         ignoreExitValue true
                     }
