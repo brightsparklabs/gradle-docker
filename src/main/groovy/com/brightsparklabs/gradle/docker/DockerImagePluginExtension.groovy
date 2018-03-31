@@ -23,6 +23,9 @@ class DockerImagePluginExtension {
      */
     List dockerFileDefinitions = []
 
+    /** Directory to store images in */
+    File imagesDir
+
     /** Directory to store image tags in */
     File imageTagDir
 

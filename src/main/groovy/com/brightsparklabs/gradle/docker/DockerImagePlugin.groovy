@@ -5,8 +5,8 @@
 
 package com.brightsparklabs.gradle.docker
 
-import java.util.logging.Logger
 import org.gradle.api.GradleException
+import org.gradle.api.logging.LogLevel
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -30,6 +30,7 @@ class DockerImagePlugin implements Plugin<Project> {
         // Create plugin configuration object.
         def config = project.extensions.create('dockerImagePluginConfig', DockerImagePluginExtension)
         // set default values for configuration based on project
+        config.imagesDir = config.imagesDir ?: new File(project.buildDir, 'images')
         config.imageTagDir = config.imageTagDir ?: new File(project.buildDir, 'imageTags')
 
         // Add all tasks once project configuration has been read.
@@ -66,21 +67,22 @@ class DockerImagePlugin implements Plugin<Project> {
             group = "brightSPARK Labs - Docker"
             description = "Builds docker images from Dockerfiles"
 
-            // always run task as any source files may have changed
-            outputs.upToDateWhen { false }
+            inputs.files config.dockerFileDefinitions.collect { it.dockerfile.parentFile }
+            outputs.dir config.imageTagDir
 
             doLast {
+                project.delete config.imageTagDir
                 config.imageTagDir.mkdirs()
 
+                def repoGitTag = getRepositoryGitTag()
                 config.dockerFileDefinitions.each { definition ->
                     // Add default tags for 'latest' and repo git tag
                     def latestTag = "${definition.repository}:latest"
-                    def repoGitTag = getRepositoryGitTag(definition.dockerfile.getParentFile())
-                    repoGitTag = "${definition.repository}:g" + repoGitTag
-                    def command = ['docker', 'build', '-t', latestTag, '-t', repoGitTag]
+                    def gitTag = "${definition.repository}:${repoGitTag}"
+                    def command = ['docker', 'build', '-t', latestTag, '-t', gitTag]
 
                     // Add tag based on git commit of the folder containing dockerfile
-                    File folder = definition.dockerfile.getParentFile()
+                    File folder = definition.dockerfile.parentFile
                     def folderTag = getLastCommitHash(folder)
                     if (! folderTag.isEmpty()) {
                         folderTag = "${definition.repository}:g${folderTag}"
@@ -98,12 +100,18 @@ class DockerImagePlugin implements Plugin<Project> {
                     }
                     command << '.'
 
+                    def oldLevel = logging.standardOutputCaptureLevel
+                    logging.captureStandardOutput LogLevel.INFO
+                    logger.lifecycle("Building image [${definition.repository}] from [${definition.dockerfile}] ...")
+
                     def buildResult = project.exec {
                         commandLine command
-                        workingDir definition.dockerfile.getParentFile()
+                        workingDir definition.dockerfile.parentFile
                         // do not prevent other docker builds if one fails
                         ignoreExitValue true
                     }
+                    logging.captureStandardOutput oldLevel
+
                     if (buildResult.getExitValue() == 0) {
                         // store image tag
                         def friendlyImageName = definition.repository.replaceAll('/', '-')
@@ -139,24 +147,25 @@ class DockerImagePlugin implements Plugin<Project> {
             description = "Saves docker images to TAR files"
             dependsOn project.buildDockerImages
 
-            inputs.files config.dockerFileDefinitions.collect { it.dockerfile }
-            def imagesDir = new File(project.buildDir, '/images')
-            outputs.dir imagesDir
+            inputs.files config.dockerFileDefinitions.collect { it.dockerfile.parentFile }
+            outputs.dir config.imagesDir
 
             doLast {
-                imagesDir.mkdirs()
+                project.delete config.imagesDir
+                config.imagesDir.mkdirs()
 
+                def imageVersion = getRepositoryGitTag()
                 config.dockerFileDefinitions.each { definition ->
-                    def imageVersion = getRepositoryGitTag(definition.dockerfile.getParentFile())
-                    def imageTag = "${definition.repository}:g${imageVersion}"
+                    def imageTag = "${definition.repository}:${imageVersion}"
                     def friendlyImageName = definition.repository.replaceAll('/', '-')
-                    def imageFilename = "docker-image-${friendlyImageName}-g${imageVersion}.tar"
-                    def imageFile = new File(imagesDir, imageFilename)
+                    def imageFilename = "docker-image-${friendlyImageName}-${imageVersion}.tar"
+                    def imageFile = new File(config.imagesDir, imageFilename)
 
+                    logger.lifecycle("Saving image [${definition.repository}] ...")
                     def buildResult = project.exec {
                         commandLine 'docker', 'save', imageTag
                         standardOutput = new FileOutputStream(imageFile)
-                        workingDir imagesDir
+                        workingDir config.imagesDir
                         // do not prevent other docker builds if one fails
                         ignoreExitValue true
                     }
@@ -191,6 +200,7 @@ class DockerImagePlugin implements Plugin<Project> {
 
             doLast {
                 config.dockerFileDefinitions.each { definition ->
+                    logger.lifecycle("Publishing image [${definition.repository}] ...")
                     def buildResult = project.exec {
                         commandLine 'docker', 'push', definition.repository
                         // do not prevent other docker builds if one fails
@@ -213,14 +223,11 @@ class DockerImagePlugin implements Plugin<Project> {
     /**
      * Returns the git tag of the repository.
      *
-     * @param workingDir
-     *          the directory to execute the git command within
-     *
      * @return the git tag of the repository or '0.0.0-UNKNOWN' if no tags
      *         exist
      */
-    def getRepositoryGitTag(File workingDir) {
-        def tag = shell "git describe --dirty", workingDir
+    def getRepositoryGitTag() {
+        def tag = shell("git describe --dirty")
         if (tag.isEmpty()) {
             tag = '0.0.0-UNKNOWN'
         }
@@ -228,13 +235,12 @@ class DockerImagePlugin implements Plugin<Project> {
     }
 
     /**
-     * Returns the last git commit hash of the specified file.
+     * Returns the last git commit hash of the specified file/folder.
      *
-     * @return the last git commit hash of the specified file
+     * @return the last git commit hash of the specified file/folder
      */
     def getLastCommitHash(File file) {
-        def workingDir = file.getParentFile()
-        def tag = shell "git log -n 1 --pretty=format:%h -- ${file}", workingDir
+        def tag = shell("git log -n 1 --pretty=format:%h -- ${file}")
         return tag
     }
 
@@ -244,13 +250,10 @@ class DockerImagePlugin implements Plugin<Project> {
      * @param command
      *          the command to execute (cannot contain pipes)
      *
-     * @param workingDir
-     *          the directory to execute the command within
-     *
-     * @return the result from stdout
+     * @return the trimmed result from stdout
      */
-    def shell(String command, File workingDir) {
-        return command.execute(null, workingDir).text.trim()
+    def shell(String command) {
+        return command.execute().text.trim()
     }
 }
 
