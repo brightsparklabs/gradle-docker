@@ -42,16 +42,29 @@ tags:
   no git tags.
 - The latest git commit id of the folder containing the Dockerfile or
   `UNKNOWN-COMMIT` if there is not commit id on the folder (i.e. folder is not
-  checked into git). This is prepended with `g` to indicate it is a `git`
-  commit id.
+  checked into git).
 - The UTC timestamp of the build in ISO8601 format (without colons).
 
 The following `build-args` are automatically passed to the `docker build`
-command and can be utilised in the `Dockerfile` for labels, environment
-variables, etc:
+command:
 
 - `BUILD_DATE`: the UTC timestamp of the build in ISO8601 format.
 - `VCS_REF`: the latest git commit id of the folder containing the Dockerfile.
+
+These build-args can be utilised within the `Dockerfile` for labels,
+environment variables, etc:
+
+    ARG BUILD_DATE
+    ARG VCS_REF
+    LABEL org.label-schema.name="docker-gradle" \
+          org.label-schema.description="Image used to run gradle-docker" \
+          org.label-schema.vendor="brightSPARK Labs" \
+          org.label-schema.schema-version="1.0.0-rc1" \
+          org.label-schema.vcs-url="https://github.com/brightsparklabs/gradle-docker/" \
+          org.label-schema.vcs-ref=${VCS_REF} \
+          org.label-schema.build-date=${BUILD_DATE}
+    ENV META_BUILD_DATE=${BUILD_DATE}
+    ENV META_VCS_REF=${VCS_REF}
 
 An image tag file will be generated for each Docker image. This file will
 contain the full tag of the image (based off the version property from the
