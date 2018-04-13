@@ -83,11 +83,11 @@ class DockerImagePlugin implements Plugin<Project> {
 
                     // Add tag based on git commit of the folder containing dockerfile
                     File parentFolder = definition.dockerfile.parentFile
-                    def folderTag = getLastCommitHash(parentFolder)
-                    if (folderTag.isEmpty()) {
-                        folderTag = 'UNKNOWN-COMMIT'
+                    def folderCommit = getLastCommitHash(parentFolder)
+                    if (folderCommit.isEmpty()) {
+                        folderCommit = 'UNKNOWN-COMMIT'
                     }
-                    folderTag = "${definition.repository}:g${folderTag}"
+                    folderTag = "${definition.repository}:${folderCommit}"
                     command << '-t'
                     command << folderTag
 
@@ -113,7 +113,7 @@ class DockerImagePlugin implements Plugin<Project> {
                     command << '--build-arg'
                     command << "BUILD_DATE=${timestamp}"
                     command << '--build-arg'
-                    command << "VCS_REF=${folderTag}"
+                    command << "VCS_REF=${folderCommit}"
 
                     // folder to build
                     command << parentFolder
