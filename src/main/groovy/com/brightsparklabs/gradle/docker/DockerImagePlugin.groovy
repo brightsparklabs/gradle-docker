@@ -87,7 +87,7 @@ class DockerImagePlugin implements Plugin<Project> {
                     if (folderCommit.isEmpty()) {
                         folderCommit = 'UNKNOWN-COMMIT'
                     }
-                    folderTag = "${definition.repository}:${folderCommit}"
+                    def folderTag = "${definition.repository}:${folderCommit}"
                     command << '-t'
                     command << folderTag
 
