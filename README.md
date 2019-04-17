@@ -64,7 +64,7 @@ environment variables, etc:
           org.label-schema.schema-version="1.0.0-rc1" \
           org.label-schema.vcs-url="https://github.com/brightsparklabs/gradle-docker/" \
           org.label-schema.vcs-ref=${VCS_REF} \
-          org.label-schema.build-date=${BUILD_DATE}
+          org.label-schema.build-date=${BUILD_DATE} \
           org.label-schema.version=${APP_VERSION}
     ENV META_BUILD_DATE=${BUILD_DATE}
     ENV META_VCS_REF=${VCS_REF}
