@@ -19,6 +19,10 @@ class DockerImagePluginExtension {
      *        'name'       : 'brightsparklabs/acme',
      *        // OPTIONAL: custom tags for the built docker image
      *        'tags'       : ['v1.0.1', 'awesome-ant']
+     *        // OPTIONAL: additional arguments to the `docker build` command
+     *        'buildArgs'  : ['--compress', '--quiet']
+     *        // OPTIONAL: target to build (only applies to multi-stage builds)
+     *        'target'     : 'dev'
      *    ]
      */
     List dockerFileDefinitions = []

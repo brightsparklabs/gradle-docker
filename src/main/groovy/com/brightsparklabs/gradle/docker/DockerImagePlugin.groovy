@@ -115,9 +115,22 @@ class DockerImagePlugin implements Plugin<Project> {
                     command << "BUILD_DATE=${timestamp}"
                     command << '--build-arg'
                     command << "VCS_REF=${folderCommit}"
+                    command << '--build-arg'
+                    command << "APP_VERSION=${project.version}"
 
                     // folder to build
                     command << parentFolder
+
+                    // multi-stage target
+                    if (definition.target) {
+                        command << '--target'
+                        command << definition.target
+                    }
+
+                    // custom build arguments
+                    if (definition.buildArgs) {
+                        command.addAll(definition.buildArgs)
+                    }
 
                     def oldLevel = logging.standardOutputCaptureLevel
                     logging.captureStandardOutput LogLevel.INFO

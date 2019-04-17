@@ -48,12 +48,14 @@ tags:
 The following `build-args` are automatically passed to the `docker build`
 command:
 
+- `APP_VERSION`: the gradle property `project.version`.
 - `BUILD_DATE`: the UTC timestamp of the build in ISO8601 format.
 - `VCS_REF`: the latest git commit id of the folder containing the Dockerfile.
 
 These build-args can be utilised within the `Dockerfile` for labels,
 environment variables, etc:
 
+    ARG APP_VERSION
     ARG BUILD_DATE
     ARG VCS_REF
     LABEL org.label-schema.name="docker-gradle" \
@@ -63,8 +65,10 @@ environment variables, etc:
           org.label-schema.vcs-url="https://github.com/brightsparklabs/gradle-docker/" \
           org.label-schema.vcs-ref=${VCS_REF} \
           org.label-schema.build-date=${BUILD_DATE}
+          org.label-schema.version=${APP_VERSION}
     ENV META_BUILD_DATE=${BUILD_DATE}
     ENV META_VCS_REF=${VCS_REF}
+    ENV APP_VERSION=${APP_VERSION}
 
 An image tag file will be generated for each Docker image. This file will
 contain the full tag of the image (based off the version property from the
@@ -103,11 +107,13 @@ dockerImagePluginConfig {
         [
             'dockerfile' : file('src/alpha/Dockerfile'),
             'name'       : 'brightsparklabs/alpha',
-            'tags'       : ['awesome-ant', 'testing']
+            'tags'       : ['awesome-ant', 'testing'],
         ],
         [
             'dockerfile' : file('src/bravo/Dockerfile'),
             'repository' : 'brightsparklabs/bravo',
+            'target'     : 'dev-mode',
+            'buildArgs'  : ['--compress', '--quiet'],
         ],
     ]
     imagesDir = new File('build/images/')
@@ -122,14 +128,18 @@ Where:
     - `dockerfile`: [`File`] dockerfile to build
     - `name`: [`String`] repository name for the built docker image
     - `repository`: [`String`] repository name for the built docker image
-        - **DEPRECATED**: Use `name` instead
-    - `tags`: [String[]`] custom tags for the built docker image (optional)
+       [**DEPRECATED** use `name` instead]
+    - `tags`: [String[]`] custom tags for the built docker image [optional]
+    - `buildArgs`: [String[]`] additional arguments to the `docker build`
+      command [optional]
+    - `target`: [`String`] target to build (only applies to multi-stage builds)
+      [optional]
 - `imageTagDir`: [`File`] the directory in which to store images
-  (optional, default is `build/images`)
+  [optional, default: `build/images`]
 - `imageTagDir`: [`File`] the directory in which to store image tag files
-  (optional, default is `build/imageTags`)
+  [optional, default: `build/imageTags`]
 - `continueOnFailure`: [`Boolean`] set to true if the build should continue
-  even if a docker image build fails (optional, default is `false`)
+  even if a docker image build fails [optional, default: `false`]
 
 ### Example
 
