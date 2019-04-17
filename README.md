@@ -74,9 +74,9 @@ gradle build script). E.g.
 
 Each image tag file will be named using the format:
 
-- `VERSION.DOCKER_IMAGE.<repository>`
+- `VERSION.DOCKER_IMAGE.<repositoryName>`
     - Where:
-        - `repository` is a filename friendly version of the `repository`
+        - `repositoryName` is a filename friendly version of the `name`
           provided in the plugin's configuration block.
 
 #### saveDockerImages
@@ -102,7 +102,7 @@ dockerImagePluginConfig {
     dockerFileDefinitions = [
         [
             'dockerfile' : file('src/alpha/Dockerfile'),
-            'repository' : 'brightsparklabs/alpha',
+            'name'       : 'brightsparklabs/alpha',
             'tags'       : ['awesome-ant', 'testing']
         ],
         [
@@ -120,7 +120,9 @@ Where:
 
 - `dockerFileDefinitions`: [`Map[]`] each map has the following keys:
     - `dockerfile`: [`File`] dockerfile to build
+    - `name`: [`String`] repository name for the built docker image
     - `repository`: [`String`] repository name for the built docker image
+        - **DEPRECATED**: Use `name` instead
     - `tags`: [String[]`] custom tags for the built docker image (optional)
 - `imageTagDir`: [`File`] the directory in which to store images
   (optional, default is `build/images`)

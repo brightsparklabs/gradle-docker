@@ -77,8 +77,9 @@ class DockerImagePlugin implements Plugin<Project> {
                 def repoGitTag = getRepositoryGitTag()
                 config.dockerFileDefinitions.each { definition ->
                     // Add default tags for 'latest' and repo git tag
-                    def latestTag = "${definition.repository}:latest"
-                    def gitTag = "${definition.repository}:${repoGitTag}"
+                    def imageName = definition.name ?: definition.repository
+                    def latestTag = "${imageName}:latest"
+                    def gitTag = "${imageName}:${repoGitTag}"
                     def command = ['docker', 'build', '-t', latestTag, '-t', gitTag]
 
                     // Add tag based on git commit of the folder containing dockerfile
@@ -87,14 +88,14 @@ class DockerImagePlugin implements Plugin<Project> {
                     if (folderCommit.isEmpty()) {
                         folderCommit = 'UNKNOWN-COMMIT'
                     }
-                    def folderTag = "${definition.repository}:${folderCommit}"
+                    def folderTag = "${imageName}:${folderCommit}"
                     command << '-t'
                     command << folderTag
 
                     // Add any custom tags defined in code
                     def customTags = definition.tags ?: []
                     if (! customTags.isEmpty()) {
-                        def tags = customTags.collect { "${definition.repository}:${it}" }
+                        def tags = customTags.collect { "${imageName}:${it}" }
                         tags = tags.join(',-t,').split(',')
                         command << '-t'
                         command.addAll(tags)
@@ -102,12 +103,12 @@ class DockerImagePlugin implements Plugin<Project> {
 
                     // Add version tag from the version property in the build script
                     command << '-t'
-                    command << "${definition.repository}:${project.version}"
+                    command << "${imageName}:${project.version}"
 
                     // Add timestamp tag so we can differentiate builds easily
                     def timestamp = new Date().toInstant().toString()
                     command << '-t'
-                    command << "${definition.repository}:${timestamp.replace(':', '')}"
+                    command << "${imageName}:${timestamp.replace(':', '')}"
 
                     // add build-args which can be referenced within Dockerfile
                     command << '--build-arg'
@@ -120,7 +121,7 @@ class DockerImagePlugin implements Plugin<Project> {
 
                     def oldLevel = logging.standardOutputCaptureLevel
                     logging.captureStandardOutput LogLevel.INFO
-                    logger.lifecycle("Building image [${definition.repository}] from [${definition.dockerfile}] ...")
+                    logger.lifecycle("Building image [${imageName}] from [${definition.dockerfile}] ...")
 
                     def buildResult = project.exec {
                         commandLine command
@@ -131,7 +132,7 @@ class DockerImagePlugin implements Plugin<Project> {
 
                     if (buildResult.getExitValue() == 0) {
                         // store image tag
-                        def friendlyImageName = definition.repository.replaceAll('/', '-')
+                        def friendlyImageName = imageName.replaceAll('/', '-')
                         def imageTagFile = new File(config.imageTagDir, "VERSION.DOCKER-IMAGE.${friendlyImageName}")
                         imageTagFile.text = repoGitTag
                     }
@@ -173,12 +174,13 @@ class DockerImagePlugin implements Plugin<Project> {
 
                 def imageVersion = project.version
                 config.dockerFileDefinitions.each { definition ->
-                    def imageTag = "${definition.repository}:${imageVersion}"
-                    def friendlyImageName = definition.repository.replaceAll('/', '-')
+                    def imageName = ${definition.name} ?: ${definition.repository}
+                    def imageTag = "${imageName}:${imageVersion}"
+                    def friendlyImageName = imageName.replaceAll('/', '-')
                     def imageFilename = "docker-image-${friendlyImageName}-${imageVersion}.tar"
                     def imageFile = new File(config.imagesDir, imageFilename)
 
-                    logger.lifecycle("Saving image [${definition.repository}] ...")
+                    logger.lifecycle("Saving image [${imageName}] ...")
                     def buildResult = project.exec {
                         commandLine 'docker', 'save', imageTag
                         standardOutput = new FileOutputStream(imageFile)
@@ -217,14 +219,15 @@ class DockerImagePlugin implements Plugin<Project> {
 
             doLast {
                 config.dockerFileDefinitions.each { definition ->
-                    logger.lifecycle("Publishing image [${definition.repository}] ...")
+                    def imageName = ${definition.name} ?: ${definition.repository}
+                    logger.lifecycle("Publishing image [${imageName}] ...")
                     def buildResult = project.exec {
-                        commandLine 'docker', 'push', definition.repository
+                        commandLine 'docker', 'push', imageName
                         // do not prevent other docker builds if one fails
                         ignoreExitValue true
                     }
                     if (buildResult.getExitValue() != 0) {
-                        def error = "Could not push docker image [${definition.repository}]"
+                        def error = "Could not push docker image [${imageName}]"
                         if (config.continueOnFailure) {
                             failures << error
                         }
