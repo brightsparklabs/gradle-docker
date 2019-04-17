@@ -187,7 +187,7 @@ class DockerImagePlugin implements Plugin<Project> {
 
                 def imageVersion = project.version
                 config.dockerFileDefinitions.each { definition ->
-                    def imageName = ${definition.name} ?: ${definition.repository}
+                    def imageName = definition.name ?: definition.repository
                     def imageTag = "${imageName}:${imageVersion}"
                     def friendlyImageName = imageName.replaceAll('/', '-')
                     def imageFilename = "docker-image-${friendlyImageName}-${imageVersion}.tar"
@@ -232,7 +232,7 @@ class DockerImagePlugin implements Plugin<Project> {
 
             doLast {
                 config.dockerFileDefinitions.each { definition ->
-                    def imageName = ${definition.name} ?: ${definition.repository}
+                    def imageName = definition.name ?: definition.repository
                     logger.lifecycle("Publishing image [${imageName}] ...")
                     def buildResult = project.exec {
                         commandLine 'docker', 'push', imageName
