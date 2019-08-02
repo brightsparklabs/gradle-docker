@@ -130,8 +130,8 @@ dockerImagePluginConfig {
     deleteOlderImages = true
     removeDanglingImages = true
     privateDockerServer = 'docker.brightsparklabs.com'
-    privateDockerUsername = 'username'
-    privateDockerPassword = 'password'
+    privateDockerUsername =  project.hasProperty('dockerUsername') ? dockerUsername : System.env.DOCKER_USERNAME
+    privateDockerPassword =  project.hasProperty('dockerPassword') ? dockerPassword : System.env.DOCKER_PASSWORD
 }
 ```
 

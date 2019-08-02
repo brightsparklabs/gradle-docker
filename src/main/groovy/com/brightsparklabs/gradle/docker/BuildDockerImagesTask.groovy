@@ -244,8 +244,8 @@ class BuildDockerImagesTask extends DefaultTask {
      * @return the trimmed result from stdout
      */
     def removeImagesOlderThan(imageName) {
-        def imageIds = "docker images -f before=${imageName}:latest -f reference=${imageName} -q"
-                .execute().text.split('\n').join(' ')
+        def command = "docker images -f before=${imageName}:latest -f reference=${imageName} -q"
+        def imageIds = shell(command).split('\n').join(' ')
         return shell("docker rmi -f ${imageIds}")
     }
 
@@ -255,8 +255,8 @@ class BuildDockerImagesTask extends DefaultTask {
      * @return the trimmed result from stdout
      */
     def removeDanglingImages() {
-        def danglingImageIds = "docker images -f dangling=true -q"
-                .execute().text.split('\n').join(' ')
+        def command = "docker images -f dangling=true -q"
+        def danglingImageIds = shell(command).split('\n').join(' ')
         return shell("docker rmi -f ${danglingImageIds}")
     }
 
@@ -272,7 +272,13 @@ class BuildDockerImagesTask extends DefaultTask {
      * @return the trimmed result from stdout
      */
     def dockerLogin(String username, String password, String server) {
-        return shell("docker login -u ${username} -p ${password} ${server}")
+        def process = "docker login -u ${username} -p ${password} ${server}".execute()
+        process.waitFor()
+        if (process.exitValue() != 0) {
+            throw new GradleException("Docker login to [${server}] as [${username}] failed - " +
+                    "${process.err.text}")
+        }
+        return process.text.trim()
     }
 
     /**
