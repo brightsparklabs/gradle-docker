@@ -33,6 +33,13 @@ The plugin adds the following gradle tasks:
 
 Builds and tags the images as specified in the configuration block.
 
+The following command line arguments can be specified when running this task:
+
+- `imageName`: only build the image in the configuration block with the 
+  specified name. E.g.
+
+        gradle buildDockerImages --imageName brightsparklabs/alpha
+
 The following tags are automatically added in addition to any specified custom
 tags:
 
