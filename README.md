@@ -33,6 +33,13 @@ The plugin adds the following gradle tasks:
 
 Builds and tags the images as specified in the configuration block.
 
+The following command line arguments can be specified when running this task:
+
+- `imageName`: only build the image in the configuration block with the 
+  specified name. E.g.
+
+        gradle buildDockerImages --imageName brightsparklabs/alpha
+
 The following tags are automatically added in addition to any specified custom
 tags:
 
@@ -107,18 +114,24 @@ dockerImagePluginConfig {
         [
             'dockerfile' : file('src/alpha/Dockerfile'),
             'name'       : 'brightsparklabs/alpha',
-            'tags'       : ['awesome-ant', 'testing'],
+            'tags'       : ['awesome-ant', 'testing']
         ],
         [
-            'dockerfile' : file('src/bravo/Dockerfile'),
+            'dockerfile' : file('src/bravo/bravo.Dockerfile'),
             'repository' : 'brightsparklabs/bravo',
             'target'     : 'dev-mode',
             'buildArgs'  : ['--compress', '--quiet'],
+            'contextDir' : file('./src')
         ],
     ]
     imagesDir = new File('build/images/')
     imageTagDir = new File('build/imageTags/')
     continueOnFailure = true
+    deleteOlderImages = true
+    removeDanglingImages = true
+    privateDockerServer = 'docker.brightsparklabs.com'
+    privateDockerUsername =  project.hasProperty('dockerUsername') ? dockerUsername : System.env.DOCKER_USERNAME
+    privateDockerPassword =  project.hasProperty('dockerPassword') ? dockerPassword : System.env.DOCKER_PASSWORD
 }
 ```
 
@@ -140,6 +153,16 @@ Where:
   [optional, default: `build/imageTags`]
 - `continueOnFailure`: [`Boolean`] set to true if the build should continue
   even if a docker image build fails [optional, default: `false`]
+- `deleteOlderImages`: [`Boolean`] set to true if older images of the same name
+  should be deleted after each new image is built [optional, default: `false`]
+- `removeDanglingImages`: [`Boolean`] set to true if the build should remove
+  dangling images after all images are built [optional, default: `false`]
+- `privateDockerServer`: [`String`] the private Docker server to log into when
+  building images that use private images as a base [optional]
+- `privateDockerUsername`: [`String`] the private Docker server username to use
+  when logging into the specified private Docker server [optional]
+- `privateDockerPassword`: [`String`] the private Docker server password to use
+  when logging into the specified private Docker server [optional]
 
 ### Example
 
@@ -151,7 +174,7 @@ my-project/ (git tag: 1.2.0)
   - alpha/ (latest commit id: 62d1a77)
     - Dockerfile
   - bravo/ (latest commit id: e8b158f)
-    - Dockerfile
+    - bravo.Dockerfile
 ```
 
 Running `gradle saveDockerImages` will:
