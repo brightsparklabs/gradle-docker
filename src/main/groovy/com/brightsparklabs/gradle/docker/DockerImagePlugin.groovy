@@ -6,7 +6,6 @@
 package com.brightsparklabs.gradle.docker
 
 import org.gradle.api.GradleException
-import org.gradle.api.logging.LogLevel
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -62,104 +61,15 @@ class DockerImagePlugin implements Plugin<Project> {
      * @param config
      *          plugin configuration block.
      */
-    def addBuildDockerImageTask(Project project, DockerImagePluginExtension config) {
-        project.task('buildDockerImages') {
+    def addBuildDockerImageTask(Project project, DockerImagePluginExtension pluginConf) {
+        project.task('buildDockerImages', type: BuildDockerImagesTask) {
             group = "brightSPARK Labs - Docker"
             description = "Builds docker images from Dockerfiles"
 
-            inputs.files config.dockerFileDefinitions.collect { it.dockerfile.parentFile }
-            outputs.dir config.imageTagDir
+            inputs.files pluginConf.dockerFileDefinitions.collect { it.dockerfile.parentFile }
+            outputs.dir pluginConf.imageTagDir
 
-            doLast {
-                project.delete config.imageTagDir
-                config.imageTagDir.mkdirs()
-
-                def repoGitTag = getRepositoryGitTag()
-                config.dockerFileDefinitions.each { definition ->
-                    // Add default tags for 'latest' and repo git tag
-                    def imageName = definition.name ?: definition.repository
-                    def latestTag = "${imageName}:latest"
-                    def gitTag = "${imageName}:${repoGitTag}"
-                    def command = ['docker', 'build', '-t', latestTag, '-t', gitTag]
-
-                    // Add tag based on git commit of the folder containing dockerfile
-                    File parentFolder = definition.dockerfile.parentFile
-                    def folderCommit = getLastCommitHash(parentFolder)
-                    if (folderCommit.isEmpty()) {
-                        folderCommit = 'UNKNOWN-COMMIT'
-                    }
-                    def folderTag = "${imageName}:${folderCommit}"
-                    command << '-t'
-                    command << folderTag
-
-                    // Add any custom tags defined in code
-                    def customTags = definition.tags ?: []
-                    if (! customTags.isEmpty()) {
-                        def tags = customTags.collect { "${imageName}:${it}" }
-                        tags = tags.join(',-t,').split(',')
-                        command << '-t'
-                        command.addAll(tags)
-                    }
-
-                    // Add version tag from the version property in the build script
-                    command << '-t'
-                    command << "${imageName}:${project.version}"
-
-                    // Add timestamp tag so we can differentiate builds easily
-                    def timestamp = new Date().toInstant().toString()
-                    command << '-t'
-                    command << "${imageName}:${timestamp.replace(':', '')}"
-
-                    // add build-args which can be referenced within Dockerfile
-                    command << '--build-arg'
-                    command << "BUILD_DATE=${timestamp}"
-                    command << '--build-arg'
-                    command << "VCS_REF=${folderCommit}"
-                    command << '--build-arg'
-                    command << "APP_VERSION=${project.version}"
-
-                    // folder to build
-                    command << parentFolder
-
-                    // multi-stage target
-                    if (definition.target) {
-                        command << '--target'
-                        command << definition.target
-                    }
-
-                    // custom build arguments
-                    if (definition.buildArgs) {
-                        command.addAll(definition.buildArgs)
-                    }
-
-                    def oldLevel = logging.standardOutputCaptureLevel
-                    logging.captureStandardOutput LogLevel.INFO
-                    logger.lifecycle("Building image [${imageName}] from [${definition.dockerfile}] ...")
-
-                    def buildResult = project.exec {
-                        commandLine command
-                        // do not prevent other docker builds if one fails
-                        ignoreExitValue true
-                    }
-                    logging.captureStandardOutput oldLevel
-
-                    if (buildResult.getExitValue() == 0) {
-                        // store image tag
-                        def friendlyImageName = imageName.replaceAll('/', '-')
-                        def imageTagFile = new File(config.imageTagDir, "VERSION.DOCKER-IMAGE.${friendlyImageName}")
-                        imageTagFile.text = repoGitTag
-                    }
-                    else {
-                        def error = "Could not build docker file [${definition.dockerfile}]"
-                        if (config.continueOnFailure) {
-                            failures << error
-                        }
-                        else {
-                            throw new GradleException(error)
-                        }
-                    }
-                }
-            }
+            config = pluginConf
         }
     }
 
@@ -251,42 +161,6 @@ class DockerImagePlugin implements Plugin<Project> {
                 }
             }
         }
-    }
-
-    /**
-     * Returns the git tag of the repository.
-     *
-     * @return the git tag of the repository or '0.0.0-UNKNOWN' if no tags
-     *         exist
-     */
-    def getRepositoryGitTag() {
-        def tag = shell("git describe --dirty")
-        if (tag.isEmpty()) {
-            tag = '0.0.0-UNKNOWN'
-        }
-        return tag
-    }
-
-    /**
-     * Returns the last git commit hash of the specified file/folder.
-     *
-     * @return the last git commit hash of the specified file/folder
-     */
-    def getLastCommitHash(File file) {
-        def tag = shell("git log -n 1 --pretty=format:%h -- ${file}")
-        return tag
-    }
-
-    /**
-     * Executes a shell command and returns the stdout result.
-     *
-     * @param command
-     *          the command to execute (cannot contain pipes)
-     *
-     * @return the trimmed result from stdout
-     */
-    def shell(String command) {
-        return command.execute().text.trim()
     }
 }
 

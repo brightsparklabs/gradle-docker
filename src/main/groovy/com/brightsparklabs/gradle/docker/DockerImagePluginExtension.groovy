@@ -23,6 +23,8 @@ class DockerImagePluginExtension {
      *        'buildArgs'  : ['--compress', '--quiet']
      *        // OPTIONAL: target to build (only applies to multi-stage builds)
      *        'target'     : 'dev'
+     *        // OPTIONAL:  the Docker build context path (defaults to parent folder)
+     *        'contextDir' : file('./')
      *    ]
      */
     List dockerFileDefinitions = []
@@ -35,5 +37,20 @@ class DockerImagePluginExtension {
 
     /** Whether to continue the build if a Dockerfile has an error */
     Boolean continueOnFailure = false
+
+    /** Whether to delete older Docker images after building each image */
+    Boolean deleteOlderImages = false
+
+    /** Whether to remove dangling Docker images after building all images*/
+    Boolean removeDanglingImages = false
+
+    /** The private Docker server */
+    String privateDockerServer
+
+    /** The private Docker server login username */
+    String privateDockerUsername
+
+    /** The private Docker server login password */
+    String privateDockerPassword
 }
 
