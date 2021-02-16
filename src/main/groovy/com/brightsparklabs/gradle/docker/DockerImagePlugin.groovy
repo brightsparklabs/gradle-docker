@@ -14,18 +14,14 @@ import org.gradle.api.Project
  */
 class DockerImagePlugin implements Plugin<Project> {
 
-    // ------------------------------------------------------------------------
-    // INSTANCE VARIABLES
-    // ------------------------------------------------------------------------
-
-    /** any failures which occurred with running docker commands */
-    def failures = []
-
     // -------------------------------------------------------------------------
     // IMPLEMENTATION: Plugin<Project>
     // -------------------------------------------------------------------------
 
     void apply(Project project) {
+        /** any failures which occurred with running docker commands */
+        project.ext.failures = []
+
         // Create plugin configuration object.
         def config = project.extensions.create('dockerImagePluginConfig', DockerImagePluginExtension)
         // set default values for configuration based on project
@@ -42,8 +38,8 @@ class DockerImagePlugin implements Plugin<Project> {
         }
 
         project.gradle.buildFinished() {
-            if (!failures.isEmpty()) {
-                throw new GradleException("Failed to build the following Dockerfiles:\n- " + failures.join('\n- '))
+            if (!project.ext.failures.isEmpty()) {
+                throw new GradleException("Failed to build the following Dockerfiles:\n- " + project.ext.failures.join('\n- '))
             }
         }
     }
@@ -114,7 +110,7 @@ class DockerImagePlugin implements Plugin<Project> {
                     if (buildResult.getExitValue() != 0) {
                         def error = "Could not save docker image [${imageTag}]"
                         if (config.continueOnFailure) {
-                            failures << error
+                            project.ext.failures << error
                         }
                         else {
                             throw new GradleException(error)
@@ -152,7 +148,7 @@ class DockerImagePlugin implements Plugin<Project> {
                     if (buildResult.getExitValue() != 0) {
                         def error = "Could not push docker image [${imageName}]"
                         if (config.continueOnFailure) {
-                            failures << error
+                            project.ext.failures << error
                         }
                         else {
                             throw new GradleException(error)

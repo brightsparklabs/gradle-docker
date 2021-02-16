@@ -174,7 +174,7 @@ class BuildDockerImagesTask extends DefaultTask {
             } else {
                 def error = "Could not build docker file [${definition.dockerfile}]"
                 if (config.continueOnFailure) {
-                    failures << error
+                    project.ext.failures << error
                 } else {
                     throw new GradleException(error)
                 }
