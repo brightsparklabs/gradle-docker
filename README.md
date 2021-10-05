@@ -2,7 +2,7 @@
 
 [![Build Status
 master](https://api.travis-ci.org/brightsparklabs/gradle-docker.svg?branch=master)](https://travis-ci.org/brightsparklabs/gradle-docker)
-[![Gradle Plugin](https://img.shields.io/badge/gradle-latest-blue)](https://plugins.gradle.org/plugin/com.brightsparklabs.gradle.docker-image)
+[![Gradle Plugin](https://img.shields.io/gradle-plugin-portal/v/com.brightsparklabs.gradle.docker-image)](https://plugins.gradle.org/plugin/com.brightsparklabs.gradle.docker-image)
 
 Gradle plugins for working with Docker.
 
