@@ -26,7 +26,7 @@ jobs:
     - name: Run Unit Tests
       run: ./gradlew build
     - name: Publish
-      if: branch = master
+      if: github.ref == 'refs/heads/master'
       run: |
         mkdir -p ~/.gradle
         echo "gradle.publish.key=${GRADLE_PUBLISH_KEY}" >> ~/.gradle/gradle.properties
