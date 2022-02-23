@@ -5,11 +5,7 @@
 
 name: Gradle Docker CI
 
-on:
-  push:
-    branches: [ feature, develop, master ]
-  pull_request:
-    branches: [ feature, develop, master ]
+on: [ push, pull_request ]
 
 jobs:
 
