@@ -8,9 +8,15 @@
 // -----------------------------------------------------------------------------
 
 plugins {
-    id 'java-gradle-plugin'
-    id 'groovy'
-    id 'com.gradle.plugin-publish' version '0.12.0'
+    // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins.
+    id "java-gradle-plugin"
+    id "com.gradle.plugin-publish" version "0.19.0"
+    id 'maven-publish'
+
+    // Apply the Groovy plugin to add support for Groovy.
+    id "groovy"
+    // Apply the Java plugin to add support for Java.
+    id "java"
 }
 
 // -----------------------------------------------------------------------------
