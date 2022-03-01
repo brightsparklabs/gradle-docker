@@ -17,6 +17,9 @@ plugins {
     id "groovy"
     // Apply the Java plugin to add support for Java.
     id "java"
+
+    // Apply the Gradle-Baseline plugin for dependency checking.
+    id "com.brightsparklabs.gradle.baseline" version "2.0.0"
 }
 
 // -----------------------------------------------------------------------------
