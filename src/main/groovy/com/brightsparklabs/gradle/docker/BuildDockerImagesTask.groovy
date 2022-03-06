@@ -1,6 +1,8 @@
 /*
- * Created by brightSPARK Labs
+ * Maintained by brightSPARK Labs.
  * www.brightsparklabs.com
+ *
+ * Refer to LICENSE at repository root for license details.
  */
 
 package com.brightsparklabs.gradle.docker
@@ -92,7 +94,14 @@ class BuildDockerImagesTask extends DefaultTask {
             def imageName = definition.name ?: definition.repository
             def latestTag = "${imageName}:latest"
             def gitTag = "${imageName}:${repoGitTag}"
-            def command = ['docker', 'build', '-t', latestTag, '-t', gitTag]
+            def command = [
+                'docker',
+                'build',
+                '-t',
+                latestTag,
+                '-t',
+                gitTag
+            ]
 
             // Add tag based on git commit of the folder containing dockerfile
             File parentFolder = definition.dockerfile.parentFile
@@ -276,7 +285,7 @@ class BuildDockerImagesTask extends DefaultTask {
         process.waitFor()
         if (process.exitValue() != 0) {
             throw new GradleException("Docker login to [${server}] as [${username}] failed - " +
-                    "${process.err.text}")
+            "${process.err.text}")
         }
         return process.text.trim()
     }
