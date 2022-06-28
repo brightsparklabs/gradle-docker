@@ -143,7 +143,7 @@ class DockerImagePlugin implements Plugin<Project> {
                     def imageName = definition.name ?: definition.repository
                     logger.lifecycle("Publishing image [${imageName}] ...")
                     def buildResult = project.exec {
-                        commandLine 'docker', 'push', imageName
+                        commandLine 'docker', 'push', '--all-tags', imageName
                         // do not prevent other docker builds if one fails
                         ignoreExitValue true
                     }
@@ -161,4 +161,3 @@ class DockerImagePlugin implements Plugin<Project> {
         }
     }
 }
-
