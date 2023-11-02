@@ -1,15 +1,11 @@
 # gradle-docker
 
-[![Build Status
-master](https://api.travis-ci.org/brightsparklabs/gradle-docker.svg?branch=master)](https://travis-ci.org/brightsparklabs/gradle-docker)
+![Build Status](https://github.com/brightsparklabs/gradle-docker/actions/workflows/gradle-docker-ci.yml/badge.svg)
 [![Gradle Plugin](https://img.shields.io/gradle-plugin-portal/v/com.brightsparklabs.gradle.docker-image)](https://plugins.gradle.org/plugin/com.brightsparklabs.gradle.docker-image)
 
 Gradle plugins for working with Docker.
 
 ## Build
-
-Development Status: [![Build Status
-develop](https://api.travis-ci.org/brightsparklabs/gradle-docker.svg?branch=develop)](https://travis-ci.org/brightsparklabs/gradle-docker)
 
 ```shell
 ./gradlew build
@@ -42,10 +38,13 @@ Builds and tags the images as specified in the configuration block.
 
 The following command line arguments can be specified when running this task:
 
-- `imageName`: only build the image in the configuration block with the 
-  specified name. E.g.
+- `includeImages`: Includes only the specified images in the build. E.g.
 
-        gradle buildDockerImages --imageName brightsparklabs/alpha
+        gradle buildDockerImages --includeImages brightsparklabs/alpha,brightsparklabs/bravo
+
+- `excludeImages`: Excludes the specified images from the build. E.g.
+
+        gradle buildDockerImages --excludeImages brightsparklabs/alpha,brightsparklabs/bravo
 
 The following tags are automatically added in addition to any specified custom
 tags:
