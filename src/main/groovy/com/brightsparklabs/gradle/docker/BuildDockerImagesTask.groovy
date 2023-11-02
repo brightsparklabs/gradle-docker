@@ -26,11 +26,14 @@ class BuildDockerImagesTask extends DefaultTask {
     // INSTANCE VARIABLES
     // ------------------------------------------------------------------------
 
-    /** the plugin configuration */
+    /** The plugin configuration. */
     private DockerImagePluginExtension config
 
-    /** an optional Docker image name to filter by */
-    private String imageName
+    /** Optional: Docker images to include in the build. Empty means include all. */
+    private List<String> includedImages = []
+
+    /** Optional: Docker images to exclude from the build. Empty means exclude nothing. */
+    private List<String> excludedImages = []
 
     @Internal
     DockerImagePluginExtension getConfig() {
@@ -43,13 +46,24 @@ class BuildDockerImagesTask extends DefaultTask {
 
     @Input
     @Optional
-    String getImageName() {
-        return this.imageName
+    String getIncludedImages() {
+        return this.includedImages
     }
 
-    @Option(option = "imageName", description = "Builds only the specific image")
-    void setImageName(final String imageName) {
-        this.imageName = imageName
+    @Option(option = "includeImages", description = "Includes only the specified images in the build")
+    void setIncludedImages(final List<String> imageName) {
+        this.includedImages = imageName
+    }
+
+    @Input
+    @Optional
+    List<String> getExcludedImages() {
+        return this.excludedImages
+    }
+
+    @Option(option = "excludeImages", description = "Excludes the specified images from the build")
+    void setExcludedImages(final List<String> excludeImages) {
+        this.excludedImages = excludeImages
     }
 
     // -------------------------------------------------------------------------
@@ -64,15 +78,22 @@ class BuildDockerImagesTask extends DefaultTask {
         def repoGitTag = getRepositoryGitTag()
         def dockerFileDefinitions = config.dockerFileDefinitions
 
-        // Filter building by Docker image name if specified
-        if (imageName?.trim()) {
-            logger.info("Filtering Dockerfile definitions with image name [${imageName}]")
-            dockerFileDefinitions = dockerFileDefinitions.findAll { it.name == imageName }
+        // Filter by inclusion list if specified.
+        if (!includedImages.isEmpty()) {
+            logger.info("Including Dockerfile definitions with image name in ${includedImages}")
+            dockerFileDefinitions = dockerFileDefinitions.findAll { includedImages.contains(it.name) }
+        }
+
+        // Filter by exclusion list if specified.
+        if (!excludedImages.isEmpty()) {
+            logger.info("Excluding Dockerfile definitions with image name in ${excludedImages}")
+            dockerFileDefinitions = dockerFileDefinitions.findAll { !excludedImages.contains(it.name) }
         }
 
         if (dockerFileDefinitions.size() == 0) {
-            throw new GradleException("No Dockerfile definitions configured for name [${imageName}]")
+            throw new GradleException("No Dockerfile definitions found after configuring include/exclude rules")
         }
+        logger.info("Building Dockerfile images for ${dockerFileDefinitions.name}")
 
         def requireLogin = config.privateDockerUsername?.trim() &&
                 config.privateDockerPassword?.trim() &&
@@ -89,7 +110,7 @@ class BuildDockerImagesTask extends DefaultTask {
             logger.info(output)
         }
 
-        dockerFileDefinitions.each { definition ->
+        dockerFileDefinitions.eachWithIndex { definition, index ->
             // Add default tags for 'latest' and repo git tag
             def imageName = definition.name ?: definition.repository
             def latestTag = "${imageName}:latest"
@@ -160,7 +181,10 @@ class BuildDockerImagesTask extends DefaultTask {
 
             def oldLevel = logging.standardOutputCaptureLevel
             logging.captureStandardOutput LogLevel.INFO
-            logger.lifecycle("Building image [${imageName}] from [${definition.dockerfile}] ...")
+
+            logger.lifecycle("\n" + "="*80)
+            logger.lifecycle("BUILDING IMAGE ${index + 1}/${dockerFileDefinitions.size()}: ${imageName} from ${definition.dockerfile}")
+            logger.lifecycle("="*80 + "\n")
 
             def buildResult = project.exec {
                 commandLine command
