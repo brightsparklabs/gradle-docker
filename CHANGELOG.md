@@ -10,11 +10,19 @@ The changelog is applicable from version `2.2.3` onwards.
 
 ## [Unreleased]
 
-NOTE: Major version, introduces breaking changes.
-
 ### Added
 
 ### Fixed
+
+### Changed
+
+[Commits](https://github.com/brightsparklabs/gradle-docker/compare/3.0.0...3.y.z)
+
+---
+
+## [3.0.0] - 2023-11-03
+
+NOTE: Major version, introduces breaking changes.
 
 ### Changed
 
@@ -44,4 +52,4 @@ _No changelog for this release._
 
 ---
 
-## [x.y.z] - 2023-11-02
+## [x.y.z] - 2023-11-03
