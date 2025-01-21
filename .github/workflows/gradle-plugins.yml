@@ -9,14 +9,7 @@ on: [ push, pull_request ]
 
 jobs:
 
-  unit-test:
-    uses: brightsparklabs/github-actions/.github/workflows/gradle-plugins.yml@master
-    secrets: inherit
-    permissions:
-      contents: write
-      pull-requests: write
-
-  publish:
+  call-gradle-workflow:
     uses: brightsparklabs/github-actions/.github/workflows/gradle-plugins.yml@master
     secrets: inherit
     permissions:
