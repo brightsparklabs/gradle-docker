@@ -15,8 +15,6 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    with:
-      java-version: '11'
 
   publish:
     uses: brightsparklabs/github-actions/.github/workflows/gradle-plugins.yml@master
@@ -24,5 +22,3 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    with:
-      java-version: '11'
