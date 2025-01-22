@@ -16,5 +16,4 @@ jobs:
       contents: write
       pull-requests: write
     with:
-      distribution: 'temurin'
-      java-version: '11'
+      java_version: '11'
