@@ -12,6 +12,8 @@ The changelog is applicable from version `2.2.3` onwards.
 
 ### Added
 
+- RAD-207: Add .sdkmanrc file to ensure workflow uses java 11
+
 ### Fixed
 
 ### Changed
