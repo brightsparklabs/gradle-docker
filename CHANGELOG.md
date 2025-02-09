@@ -16,6 +16,8 @@ The changelog is applicable from version `2.2.3` onwards.
 
 ### Changed
 
+- RAD-205: Changed gradle-docker-ci.yml workflow file to gradle-plugins.yml to use our re-usable Github actions.
+
 [Commits](https://github.com/brightsparklabs/gradle-docker/compare/3.0.0...3.y.z)
 
 ---

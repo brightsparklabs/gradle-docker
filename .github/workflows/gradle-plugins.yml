@@ -1,0 +1,19 @@
+##
+# Created by brightSPARK Labs
+# www.brightsparklabs.com
+##
+
+name: Gradle Docker CI
+on: [ push, pull_request ]
+
+
+jobs:
+
+  call-gradle-workflow:
+    uses: brightsparklabs/github-actions/.github/workflows/gradle-plugins.yml@master
+    secrets: inherit
+    permissions:
+      contents: write
+      pull-requests: write
+    with:
+      java_version: '11'
