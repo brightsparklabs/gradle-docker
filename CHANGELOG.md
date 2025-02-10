@@ -12,6 +12,8 @@ The changelog is applicable from version `2.2.3` onwards.
 
 ### Added
 
+- RAD-207: Add .sdkmanrc file to ensure java 11 is used on this project.
+
 ### Fixed
 
 ### Changed
