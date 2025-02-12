@@ -10,7 +10,7 @@
 plugins {
     // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins.
     id "java-gradle-plugin"
-    id "com.gradle.plugin-publish" version "1.3.0"
+    id "com.gradle.plugin-publish" version "1.3.1"
     id 'maven-publish'
 
     // Apply the Groovy plugin to add support for Groovy.
@@ -19,7 +19,7 @@ plugins {
     id "java"
 
     // Apply the Gradle-Baseline plugin for dependency checking.
-    id "com.brightsparklabs.gradle.baseline" version "3.1.0"
+    id "com.brightsparklabs.gradle.baseline" version "4.8.0"
 }
 
 shadowJar {
@@ -52,6 +52,9 @@ def dockerImagePluginId = 'com.brightsparklabs.gradle.docker-image'
 // -----------------------------------------------------------------------------
 
 gradlePlugin {
+    website = project.url
+    vcsUrl = project.scm
+
     plugins {
         dockerImagePlugin {
             id = dockerImagePluginId
@@ -59,10 +62,5 @@ gradlePlugin {
             displayName = 'Gradle Docker Image'
             description = 'Simplifies working with Docker images'
         }
-    }
-    pluginBundle {
-        website = project.url
-        vcsUrl = project.scm
-        tags = ['docker', 'image']
     }
 }

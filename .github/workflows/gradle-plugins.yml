@@ -16,4 +16,4 @@ jobs:
       contents: write
       pull-requests: write
     with:
-      java_version: '17'
+      java_version: '21'
