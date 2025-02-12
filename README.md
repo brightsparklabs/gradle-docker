@@ -5,6 +5,13 @@
 
 Gradle plugins for working with Docker.
 
+## Compatibility
+
+| Plugin Version | Gradle Version | Java Version |
+|----------------|----------------|--------------|
+| 3.0.0          | 7.x.y          | 11           |
+| Unreleased     | 7.x.y          | 17           |
+
 ## Build
 
 ```shell
