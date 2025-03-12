@@ -8,11 +8,13 @@ The changelog is applicable from version `2.2.3` onwards.
 
 ---
 
-## [Unreleased]
+## [4.0.0] - 2025-03-12
 
 ### Added
 
-- RAD-207: Add .sdkmanrc file to ensure java 11 is used on this project.
+- RAD-207: Add .sdkmanrc file to enforce Java version.
+- RAD-208: Updated plugins, Github actions and .sdkmanrc file to use and be compatible with Java 17.
+- RAD-208: The pluginBundle section has been removed due to its deprecation.
 
 ### Fixed
 
