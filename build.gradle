@@ -61,6 +61,10 @@ gradlePlugin {
             implementationClass = 'com.brightsparklabs.gradle.docker.DockerImagePlugin'
             displayName = 'Gradle Docker Image'
             description = 'Simplifies working with Docker images'
+            tags = [
+                "brightsparklabs",
+                "docker",
+            ]
         }
     }
 }
