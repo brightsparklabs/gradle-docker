@@ -19,7 +19,7 @@ plugins {
     id "java"
 
     // Apply the Gradle-Baseline plugin for dependency checking.
-    id "com.brightsparklabs.gradle.baseline" version "4.8.0"
+    id "com.brightsparklabs.gradle.baseline" version "4.9.0"
 }
 
 shadowJar {
