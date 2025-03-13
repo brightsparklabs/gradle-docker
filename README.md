@@ -1,6 +1,6 @@
 # gradle-docker
 
-![Build Status](https://github.com/brightsparklabs/gradle-docker/actions/workflows/gradle-docker-ci.yml/badge.svg)
+![Build Status](https://github.com/brightsparklabs/gradle-docker/actions/workflows/gradle-plugins.yml/badge.svg)
 [![Gradle Plugin](https://img.shields.io/gradle-plugin-portal/v/com.brightsparklabs.gradle.docker-image)](https://plugins.gradle.org/plugin/com.brightsparklabs.gradle.docker-image)
 
 Gradle plugins for working with Docker.
@@ -8,10 +8,10 @@ Gradle plugins for working with Docker.
 ## Compatibility
 
 | Plugin Version | Gradle Version | Java Version |
-|----------------|----------------|--------------|
+| -------------- | -------------- | ------------ |
 | 3.0.0          | 7.x.y          | 11           |
 | 4.0.0          | 7.x.y          | 17           |
-| Unreleased     | 8.12.1         | 21           |
+| 5.0.0          | 8.x.y          | 21           |
 
 ## Build
 
@@ -36,6 +36,7 @@ plugins {
     id 'com.brightsparklabs.gradle.docker-image'
 }
 ```
+
 ### Tasks
 
 The plugin adds the following gradle tasks:
@@ -100,9 +101,9 @@ gradle build script). E.g.
 Each image tag file will be named using the format:
 
 - `VERSION.DOCKER_IMAGE.<repositoryName>`
-    - Where:
-        - `repositoryName` is a filename friendly version of the `name`
-          provided in the plugin's configuration block.
+  - Where:
+    - `repositoryName` is a filename friendly version of the `name`
+      provided in the plugin's configuration block.
 
 #### saveDockerImages
 
@@ -152,15 +153,15 @@ dockerImagePluginConfig {
 Where:
 
 - `dockerFileDefinitions`: [`Map[]`] each map has the following keys:
-    - `dockerfile`: [`File`] dockerfile to build
-    - `name`: [`String`] repository name for the built docker image
-    - `repository`: [`String`] repository name for the built docker image
-       [**DEPRECATED** use `name` instead]
-    - `tags`: [String[]`] custom tags for the built docker image [optional]
-    - `buildArgs`: [String[]`] additional arguments to the `docker build`
-      command [optional]
-    - `target`: [`String`] target to build (only applies to multi-stage builds)
-      [optional]
+  - `dockerfile`: [`File`] dockerfile to build
+  - `name`: [`String`] repository name for the built docker image
+  - `repository`: [`String`] repository name for the built docker image
+    [**DEPRECATED** use `name` instead]
+  - `tags`: [String[]`] custom tags for the built docker image [optional]
+  - `buildArgs`: [String[]`] additional arguments to the `docker build`
+    command [optional]
+  - `target`: [`String`] target to build (only applies to multi-stage builds)
+    [optional]
 - `imageTagDir`: [`File`] the directory in which to store images
   [optional, default: `build/images`]
 - `imageTagDir`: [`File`] the directory in which to store image tag files
@@ -194,24 +195,23 @@ my-project/ (git tag: 1.2.0)
 Running `gradle saveDockerImages` will:
 
 - Build the following docker images:
-    - brightsparklabs/alpha:latest
-    - brightsparklabs/alpha:v1.2.0-RC (from project.version)
-    - brightsparklabs/alpha:1.2.0 (from git repo tag)
-    - brightsparklabs/alpha:g62d1a77 (from folder)
-    - brightsparklabs/alpha:awesome-ant (custom tag)
-    - brightsparklabs/alpha:testing (custom tag)
-    - brightsparklabs/bravo:latest
-    - brightsparklabs/alpha:v1.2.0-RC (from project.version)
-    - brightsparklabs/bravo:1.2.0 (from git repo tag)
-    - brightsparklabs/bravo:ge8b158f (from folder)
+  - brightsparklabs/alpha:latest
+  - brightsparklabs/alpha:v1.2.0-RC (from project.version)
+  - brightsparklabs/alpha:1.2.0 (from git repo tag)
+  - brightsparklabs/alpha:g62d1a77 (from folder)
+  - brightsparklabs/alpha:awesome-ant (custom tag)
+  - brightsparklabs/alpha:testing (custom tag)
+  - brightsparklabs/bravo:latest
+  - brightsparklabs/alpha:v1.2.0-RC (from project.version)
+  - brightsparklabs/bravo:1.2.0 (from git repo tag)
+  - brightsparklabs/bravo:ge8b158f (from folder)
 - Save the image tags to the following files:
-    - build/imageTags/VERSION.DOCKER-IMAGE.brightsparklabs-alpha
-    - build/imageTags/VERSION.DOCKER-IMAGE.brightsparklabs-bravo
+  - build/imageTags/VERSION.DOCKER-IMAGE.brightsparklabs-alpha
+  - build/imageTags/VERSION.DOCKER-IMAGE.brightsparklabs-bravo
 - Create the following docker image files:
-    - build/images/docker-image-brightsparklabs-alpha:v1.2.0-RC
-    - build/images/docker-image-brightsparklabs-bravo:v1.2.0-RC
+  - build/images/docker-image-brightsparklabs-alpha:v1.2.0-RC
+  - build/images/docker-image-brightsparklabs-bravo:v1.2.0-RC
 
 ## Licenses
 
 Refer to the `LICENSE` file for details.
-
