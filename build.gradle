@@ -40,7 +40,7 @@ repositories {
 
 project.description  = 'Gradle plugins for working with Docker'
 project.group        = 'com.brightsparklabs'
-project.version      = 'git describe --dirty'.execute().text.trim()
+project.version      = 'git describe --dirty --always'.execute().text.trim()
 
 project.ext.scm      = 'https://github.com/brightsparklabs/gradle-docker.git'
 project.ext.url      = 'https://github.com/brightsparklabs/gradle-docker'
