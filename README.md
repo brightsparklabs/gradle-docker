@@ -60,7 +60,7 @@ tags:
 
 - `latest`.
 - The version property from the gradle build script.
-- The value from running `git describe --dirty` or `0.0.0-UNKNOWN` if there are
+- The value from running `git describe --dirty --always` or `0.0.0-UNKNOWN` if there are
   no git tags.
 - The latest git commit id of the folder containing the Dockerfile or
   `UNKNOWN-COMMIT` if there is not commit id on the folder (i.e. folder is not
