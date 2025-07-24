@@ -239,7 +239,7 @@ class BuildDockerImagesTask extends DefaultTask {
      */
     @Internal
     def getRepositoryGitTag() {
-        def tag = shell("git describe --dirty --always")
+        def tag = shell("git describe --dirty")
         if (tag.isEmpty()) {
             tag = '0.0.0-UNKNOWN'
         }
