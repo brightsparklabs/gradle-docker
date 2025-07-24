@@ -41,7 +41,7 @@ repositories {
 def version = 'git describe --dirty'.execute()
 version.waitFor()
 if (version.exitValue() !=0) {
-  throw new GradleException("Git describe failed:\n${cmd.err.text}")
+    throw new GradleException("Git describe failed:\n${cmd.err.text}")
 }
 
 project.description  = 'Gradle plugins for working with Docker'
