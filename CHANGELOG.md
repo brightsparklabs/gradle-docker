@@ -14,7 +14,7 @@ The changelog is applicable from version `2.2.3` onwards.
 
 ### Fixed
 
-- SYS-177: Ensure the `--always` flag is provided to git tag generation.
+- SYS-177: Check the return of `git describe --dirty` before continuing.
 
 ### Changed
 
