@@ -8,6 +8,20 @@ The changelog is applicable from version `2.2.3` onwards.
 
 ---
 
+## [Unreleased] - yyyy-mm-dd
+
+### Added
+
+### Fixed
+
+- SYS-177: Use `gradle-baseline` to set version.
+
+### Changed
+
+[Commits](https://github.com/brightsparklabs/gradle-docker/compare/5.0.0...develop)
+
+---
+
 ## [5.0.0] - 2025-03-13
 
 ### Added
