@@ -8,6 +8,28 @@ The changelog is applicable from version `2.2.3` onwards.
 
 ---
 
+## [Unreleased] - yyyy-mm-dd
+
+### Added
+
+### Fixed
+
+### Changed
+
+[Commits](https://github.com/brightsparklabs/gradle-docker/compare/6.0.0...develop)
+
+---
+
+## [6.0.0] - 2025-12-18
+
+### Changed
+
+- NSWCC-718: Upgraded to Gradle 9.2.1.
+
+[Commits](https://github.com/brightsparklabs/gradle-docker/compare/5.0.0...6.0.0)
+
+---
+
 ## [5.0.0] - 2025-03-13
 
 ### Added
