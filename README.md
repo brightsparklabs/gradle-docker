@@ -18,10 +18,15 @@ Gradle plugins for working with Docker.
 
 ```shell
 ./gradlew build
-
-# publish
-./gradlew publishPlugins
 ```
+
+### Publishing
+
+To publish a new version:
+
+* If bumping Java, then ensure the right version is specified in `.github/` files.
+* Use `git flow` to merge it into `master`.
+* Push `master` and the CI server will publish via `./gradlew publishPlugins`.
 
 ## Docker Image Plugin
 
