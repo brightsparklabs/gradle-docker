@@ -19,11 +19,7 @@ plugins {
     id "java"
 
     // Apply the brightSPARK Labs plugin for standardisation.
-    id "com.brightsparklabs.gradle.baseline" version "4.9.0"
-}
-
-shadowJar {
-    archiveClassifier = null
+    id "com.brightsparklabs.gradle.baseline" version "6.0.0"
 }
 
 // -----------------------------------------------------------------------------
@@ -64,4 +60,14 @@ gradlePlugin {
             ]
         }
     }
+}
+
+// -----------------------------------------------------------------------------
+// Shadow Plugin (from "com.brightsparklabs.gradle.baseline")
+// -----------------------------------------------------------------------------
+
+bslBaseline {
+    // The `com.gradle.plugin-publish` adds/configures `shadowJar`.
+    // Disable the BSL baseline one to avoid conflicts.
+    enablePlugins.shadowJar = false
 }
