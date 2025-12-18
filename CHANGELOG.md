@@ -14,11 +14,19 @@ The changelog is applicable from version `2.2.3` onwards.
 
 ### Fixed
 
-- SYS-177: Use `gradle-baseline` to set version.
+### Changed
+
+[Commits](https://github.com/brightsparklabs/gradle-docker/compare/6.0.0...develop)
+
+---
+
+## [6.0.0] - 2025-12-18
 
 ### Changed
 
-[Commits](https://github.com/brightsparklabs/gradle-docker/compare/5.0.0...develop)
+- NSWCC-718: Upgraded to Gradle 9.2.1.
+
+[Commits](https://github.com/brightsparklabs/gradle-docker/compare/5.0.0...6.0.0)
 
 ---
 
