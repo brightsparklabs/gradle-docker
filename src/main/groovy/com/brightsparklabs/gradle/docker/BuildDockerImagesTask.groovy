@@ -7,6 +7,8 @@
 
 package com.brightsparklabs.gradle.docker
 
+import javax.inject.Inject
+
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.logging.LogLevel
@@ -15,12 +17,13 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
+import org.gradle.process.ExecOperations
 
 /**
  * The custom Gradle task for building Docker images. Allows instances to
  * specify command line arguments when executing the task.
  */
-class BuildDockerImagesTask extends DefaultTask {
+abstract class BuildDockerImagesTask extends DefaultTask {
 
     // ------------------------------------------------------------------------
     // INSTANCE VARIABLES
@@ -65,6 +68,14 @@ class BuildDockerImagesTask extends DefaultTask {
     void setExcludedImages(final List<String> excludeImages) {
         this.excludedImages = excludeImages
     }
+
+    // -------------------------------------------------------------------------
+    // SERVICES
+    // -------------------------------------------------------------------------
+
+    // Inject the ExecOperations service
+    @Inject
+    abstract ExecOperations getExecOperations()
 
     // -------------------------------------------------------------------------
     // IMPLEMENTATION: DefaultTask
@@ -186,7 +197,7 @@ class BuildDockerImagesTask extends DefaultTask {
             logger.lifecycle("BUILDING IMAGE ${index + 1}/${dockerFileDefinitions.size()}: ${imageName} from ${definition.dockerfile}")
             logger.lifecycle("="*80 + "\n")
 
-            def buildResult = project.exec {
+            def buildResult = getExecOperations().exec {
                 commandLine command
                 // do not prevent other docker builds if one fails
                 ignoreExitValue true
