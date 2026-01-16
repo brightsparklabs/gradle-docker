@@ -73,7 +73,7 @@ abstract class BuildDockerImagesTask extends DefaultTask {
     // SERVICES
     // -------------------------------------------------------------------------
 
-    // Inject the ExecOperations service
+    // Inject the ExecOperations service.
     @Inject
     abstract ExecOperations getExecOperations()
 
