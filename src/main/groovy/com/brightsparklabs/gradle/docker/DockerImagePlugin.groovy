@@ -23,7 +23,7 @@ abstract class DockerImagePlugin implements Plugin<Project> {
     // SERVICES
     // -------------------------------------------------------------------------
 
-    // Inject the ExecOperations service
+    // Inject the ExecOperations service.
     @Inject
     abstract ExecOperations getExecOperations()
 
