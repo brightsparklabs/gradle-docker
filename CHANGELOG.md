@@ -8,15 +8,13 @@ The changelog is applicable from version `2.2.3` onwards.
 
 ---
 
-## [Unreleased] - yyyy-mm-dd
-
-### Added
+## [6.1.0] - 2026-04-29
 
 ### Fixed
 
-### Changed
+- RAD-243: Updated usage of deprecated Gradle 8 functionality.
 
-[Commits](https://github.com/brightsparklabs/gradle-docker/compare/6.0.0...develop)
+[Commits](https://github.com/brightsparklabs/gradle-docker/compare/6.0.0...6.1.0)
 
 ---
 
