@@ -17,6 +17,7 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.process.ExecOperations
 
 /**
@@ -73,9 +74,13 @@ abstract class BuildDockerImagesTask extends DefaultTask {
     // SERVICES
     // -------------------------------------------------------------------------
 
-    // Inject the ExecOperations service
+    // Inject the ExecOperations service.
     @Inject
     abstract ExecOperations getExecOperations()
+
+    // Inject the FileSystemOperations service.
+    @Inject
+    abstract FileSystemOperations getDelete()
 
     // -------------------------------------------------------------------------
     // IMPLEMENTATION: DefaultTask
@@ -83,7 +88,10 @@ abstract class BuildDockerImagesTask extends DefaultTask {
 
     @TaskAction
     void buildDockerImages() {
-        project.delete config.imageTagDir
+        getDelete().delete {
+            delete(config.imageTagDir)
+        }
+
         config.imageTagDir.mkdirs()
 
         def repoGitTag = getRepositoryGitTag()
@@ -200,7 +208,7 @@ abstract class BuildDockerImagesTask extends DefaultTask {
             def buildResult = getExecOperations().exec {
                 commandLine command
                 // do not prevent other docker builds if one fails
-                ignoreExitValue true
+                ignoreExitValue = true
             }
             logging.captureStandardOutput oldLevel
 
