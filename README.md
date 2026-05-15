@@ -9,6 +9,7 @@ Gradle plugins for working with Docker.
 
 | Plugin Version | Gradle Version | Java Version |
 | -------------- | -------------- | ------------ |
+| 7.x.y          | > 9.2.y        | 25           |
 | 6.x.y          | 9.x.y          | 21           |
 | 5.x.y          | 8.x.y          | 21           |
 | 4.x.y          | 7.x.y          | 17           |
