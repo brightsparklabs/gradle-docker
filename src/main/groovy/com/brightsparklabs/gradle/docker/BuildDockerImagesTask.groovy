@@ -19,11 +19,13 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.process.ExecOperations
+import org.gradle.work.DisableCachingByDefault
 
 /**
  * The custom Gradle task for building Docker images. Allows instances to
  * specify command line arguments when executing the task.
  */
+@DisableCachingByDefault(because = "Docker handles the caching")
 abstract class BuildDockerImagesTask extends DefaultTask {
 
     // ------------------------------------------------------------------------
