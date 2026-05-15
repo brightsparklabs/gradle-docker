@@ -29,6 +29,13 @@ To publish a new version:
 * Use `git flow` to merge it into `master`.
 * Push `master` and the CI server will publish via `./gradlew publishPlugins`.
 
+To test publishing locally:
+
+```
+./gradlew publishPluginMavenPublicationToMavenLocal
+ls -l ~/.m2/repository/com/brightsparklabs/gradle-docker/
+```
+
 ## Docker Image Plugin
 
 This plugin simplifies working with Docker images. It is used to build and
