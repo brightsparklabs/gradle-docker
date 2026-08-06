@@ -7,14 +7,25 @@
 
 package com.brightsparklabs.gradle.docker
 
+import javax.inject.Inject
+
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.process.ExecOperations
 
 /**
  * Simplifies managing Docker images.
  */
-class DockerImagePlugin implements Plugin<Project> {
+abstract class DockerImagePlugin implements Plugin<Project> {
+
+    // -------------------------------------------------------------------------
+    // SERVICES
+    // -------------------------------------------------------------------------
+
+    // Inject the ExecOperations service.
+    @Inject
+    abstract ExecOperations getExecOperations()
 
     // -------------------------------------------------------------------------
     // IMPLEMENTATION: Plugin<Project>
@@ -102,7 +113,7 @@ class DockerImagePlugin implements Plugin<Project> {
                     def imageFile = new File(config.imagesDir, imageFilename)
 
                     logger.lifecycle("Saving image [${imageName}] ...")
-                    def buildResult = project.exec {
+                    def buildResult = getExecOperations().exec {
                         commandLine 'docker', 'save', imageTag
                         standardOutput = new FileOutputStream(imageFile)
                         workingDir config.imagesDir
@@ -142,7 +153,7 @@ class DockerImagePlugin implements Plugin<Project> {
                 config.dockerFileDefinitions.each { definition ->
                     def imageName = definition.name ?: definition.repository
                     logger.lifecycle("Publishing image [${imageName}] ...")
-                    def buildResult = project.exec {
+                    def buildResult = getExecOperations().exec {
                         commandLine 'docker', 'push', '--all-tags', imageName
                         // do not prevent other docker builds if one fails
                         ignoreExitValue true

@@ -9,17 +9,31 @@ Gradle plugins for working with Docker.
 
 | Plugin Version | Gradle Version | Java Version |
 | -------------- | -------------- | ------------ |
-| 3.0.0          | 7.x.y          | 11           |
-| 4.0.0          | 7.x.y          | 17           |
-| 5.0.0          | 8.x.y          | 21           |
+| 7.x.y          | > 9.2.y        | 25           |
+| 6.x.y          | 9.x.y          | 21           |
+| 5.x.y          | 8.x.y          | 21           |
+| 4.x.y          | 7.x.y          | 17           |
+| 3.x.y          | 7.x.y          | 11           |
 
 ## Build
 
 ```shell
 ./gradlew build
+```
 
-# publish
-./gradlew publishPlugins
+### Publishing
+
+To publish a new version:
+
+* If bumping Java, then ensure the right version is specified in `.github/` files.
+* Use `git flow` to merge it into `master`.
+* Push `master` and the CI server will publish via `./gradlew publishPlugins`.
+
+To test publishing locally:
+
+```
+./gradlew publishPluginMavenPublicationToMavenLocal
+ls -l ~/.m2/repository/com/brightsparklabs/gradle-docker/
 ```
 
 ## Docker Image Plugin

@@ -7,6 +7,8 @@
 
 package com.brightsparklabs.gradle.docker
 
+import javax.inject.Inject
+
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.logging.LogLevel
@@ -15,12 +17,16 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
+import org.gradle.api.file.FileSystemOperations
+import org.gradle.process.ExecOperations
+import org.gradle.work.DisableCachingByDefault
 
 /**
  * The custom Gradle task for building Docker images. Allows instances to
  * specify command line arguments when executing the task.
  */
-class BuildDockerImagesTask extends DefaultTask {
+@DisableCachingByDefault(because = "Docker handles the caching")
+abstract class BuildDockerImagesTask extends DefaultTask {
 
     // ------------------------------------------------------------------------
     // INSTANCE VARIABLES
@@ -67,12 +73,27 @@ class BuildDockerImagesTask extends DefaultTask {
     }
 
     // -------------------------------------------------------------------------
+    // SERVICES
+    // -------------------------------------------------------------------------
+
+    // Inject the ExecOperations service.
+    @Inject
+    abstract ExecOperations getExecOperations()
+
+    // Inject the FileSystemOperations service.
+    @Inject
+    abstract FileSystemOperations getDelete()
+
+    // -------------------------------------------------------------------------
     // IMPLEMENTATION: DefaultTask
     // -------------------------------------------------------------------------
 
     @TaskAction
     void buildDockerImages() {
-        project.delete config.imageTagDir
+        getDelete().delete {
+            delete(config.imageTagDir)
+        }
+
         config.imageTagDir.mkdirs()
 
         def repoGitTag = getRepositoryGitTag()
@@ -186,10 +207,10 @@ class BuildDockerImagesTask extends DefaultTask {
             logger.lifecycle("BUILDING IMAGE ${index + 1}/${dockerFileDefinitions.size()}: ${imageName} from ${definition.dockerfile}")
             logger.lifecycle("="*80 + "\n")
 
-            def buildResult = project.exec {
+            def buildResult = getExecOperations().exec {
                 commandLine command
                 // do not prevent other docker builds if one fails
-                ignoreExitValue true
+                ignoreExitValue = true
             }
             logging.captureStandardOutput oldLevel
 

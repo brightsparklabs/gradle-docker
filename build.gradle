@@ -18,12 +18,8 @@ plugins {
     // Apply the Java plugin to add support for Java.
     id "java"
 
-    // Apply the Gradle-Baseline plugin for dependency checking.
-    id "com.brightsparklabs.gradle.baseline" version "4.9.0"
-}
-
-shadowJar {
-    archiveClassifier = null
+    // Apply the brightSPARK Labs plugin for standardisation.
+    id "com.brightsparklabs.gradle.baseline" version "6.0.0"
 }
 
 // -----------------------------------------------------------------------------
@@ -39,9 +35,6 @@ repositories {
 // -----------------------------------------------------------------------------
 
 project.description  = 'Gradle plugins for working with Docker'
-project.group        = 'com.brightsparklabs'
-project.version      = 'git describe --dirty'.execute().text.trim()
-
 project.ext.scm      = 'https://github.com/brightsparklabs/gradle-docker.git'
 project.ext.url      = 'https://github.com/brightsparklabs/gradle-docker'
 
@@ -61,6 +54,20 @@ gradlePlugin {
             implementationClass = 'com.brightsparklabs.gradle.docker.DockerImagePlugin'
             displayName = 'Gradle Docker Image'
             description = 'Simplifies working with Docker images'
+            tags = [
+                "brightsparklabs",
+                "docker",
+            ]
         }
     }
+}
+
+// -----------------------------------------------------------------------------
+// Shadow Plugin (from "com.brightsparklabs.gradle.baseline")
+// -----------------------------------------------------------------------------
+
+bslBaseline {
+    // The `com.gradle.plugin-publish` adds/configures `shadowJar`.
+    // Disable the BSL baseline one to avoid conflicts.
+    enablePlugins.shadowJar = false
 }

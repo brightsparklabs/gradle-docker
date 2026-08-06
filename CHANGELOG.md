@@ -8,6 +8,36 @@ The changelog is applicable from version `2.2.3` onwards.
 
 ---
 
+## [7.0.0] - 2026-05-15
+
+### Changed
+
+- NSWCC-805: Upgraded to Java 25 and Gradle 9.5.0.
+
+[Commits](https://github.com/brightsparklabs/gradle-docker/compare/6.1.0...7.0.0)
+
+---
+
+## [6.1.0] - 2026-04-29
+
+### Fixed
+
+- RAD-243: Updated usage of deprecated Gradle 8 functionality.
+
+[Commits](https://github.com/brightsparklabs/gradle-docker/compare/6.0.0...6.1.0)
+
+---
+
+## [6.0.0] - 2025-12-18
+
+### Changed
+
+- NSWCC-718: Upgraded to Gradle 9.2.1.
+
+[Commits](https://github.com/brightsparklabs/gradle-docker/compare/5.0.0...6.0.0)
+
+---
+
 ## [5.0.0] - 2025-03-13
 
 ### Added
