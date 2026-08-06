@@ -1,0 +1,12 @@
+version: 2
+updates:
+- package-ecosystem: gradle
+  directory: /
+  schedule:
+    # Defaults to first day of the month.
+    interval: monthly
+  open-pull-requests-limit: 20
+  reviewers:
+  - al-jeyapal
+  labels:
+  - dependencies
